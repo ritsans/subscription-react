@@ -9,15 +9,14 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 export default tseslint.config(
   { ignores: ['dist'] },
   {
+    extends: [
+      js.configs.recommended,
+      ...tseslint.configs.recommended,  
+    ],
     files: ['**/*.{ts,tsx,js,jsx}'],
     languageOptions: {
       ecmaVersion: 2020,
-      sourceType: 'module',
       globals: globals.browser,
-      parser: '@typescript-eslint/parser',
-      parserOptions: {
-        ecmaFeatures: { jsx: true },
-      },
     },
     plugins: {
       react,
@@ -30,27 +29,14 @@ export default tseslint.config(
       },
     },
     rules: {
-      'react/react-in-jsx-scope': 'off', // React 17+ では不要
-      'react/self-closing-comp': 'warn',
-      'react/jsx-boolean-value': ['warn', 'never'],
-
-      // React Hooks 規則
+      ...react.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-
-      // TypeScript の使用上の推奨ルール
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-
-      // 開発用ホットリロード制御（Vite）
+      'react/react-in-jsx-scope': 'off',
+      'react/jsx-uses-react': 'off',
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
       ],
     },
-    extends: [
-      js.configs.recommended,
-      ...tseslint.configs.recommended,
-      react.configs.recommended,
-      reactHooks.configs.recommended,
-    ],
   },
 )
