@@ -3,7 +3,7 @@ import type { Subscription } from '../types';
 interface SubscriptionItemProps {
   subscription: Subscription;
   onEdit: (subscription: Subscription) => void;
-  onDelete: (id: string) => void;
+  onDelete: (subscription: Subscription) => void;
 }
 
 export default function SubscriptionItem({
@@ -12,9 +12,7 @@ export default function SubscriptionItem({
   onDelete
 }: SubscriptionItemProps) {
   const handleDelete = () => {
-    if (window.confirm(`「${subscription.name}」を削除しますか？`)) {
-      onDelete(subscription.id);
-    }
+    onDelete(subscription);
   };
 
   const formatPrice = (price: number, cycle: 'monthly' | 'yearly') => {
@@ -26,7 +24,7 @@ export default function SubscriptionItem({
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+    <div className="bg-white p-4 rounded-lg shadow-xs border border-gray-200 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <h3 className="font-semibold text-gray-800">{subscription.name}</h3>

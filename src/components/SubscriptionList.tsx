@@ -4,7 +4,7 @@ import SubscriptionItem from './SubscriptionItem';
 interface SubscriptionListProps {
   subscriptions: Subscription[];
   onEdit: (subscription: Subscription) => void;
-  onDelete: (id: string) => void;
+  onDelete: (subscription: Subscription) => void;
 }
 
 export default function SubscriptionList({ 
@@ -19,7 +19,7 @@ export default function SubscriptionList({
           まだサブスクリプションが登録されていません。
         </p>
         <p className="text-sm text-gray-400 mt-1">
-          上のフォームから新しいサブスクリプションを追加してください。
+          上のボタンから新しいサブスクリプションを追加してください。
         </p>
       </div>
     );

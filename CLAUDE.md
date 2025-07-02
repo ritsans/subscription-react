@@ -17,6 +17,7 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 - `pnpm lint` - Run ESLint on all files with automatic fix
 - `pnpm format` - Format code using Prettier
 - `pnpm preview` - Preview production build locally
+- `npx @tailwindcss/upgrade` - Run the tailwindcss upgrade tool. If styling fails, run this first.
 
 ## Tech Stack
 - **Framework**: React 19 with TypeScript
