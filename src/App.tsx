@@ -1,12 +1,18 @@
 import { useState } from 'react';
 import type { Subscription } from './types';
 import Summary from './components/Summary';
-import SubscriptionForm from './components/SubscriptionForm';
 import SubscriptionList from './components/SubscriptionList';
+import { AddSubscriptionModal } from './components/AddSubscriptionModal';
+import { EditSubscriptionModal } from './components/EditSubscriptionModal';
+import { DeleteConfirmModal } from './components/DeleteConfirmModal';
 
 function App() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-  const [editingSubscription, setEditingSubscription] = useState<Subscription | undefined>();
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
+  const [deletingSubscription, setDeletingSubscription] = useState<Subscription | null>(null);
 
   const generateId = () => {
     return Date.now().toString() + Math.random().toString(36).substr(2, 9);
@@ -22,27 +28,37 @@ function App() {
 
   const handleEditSubscription = (subscription: Subscription) => {
     setEditingSubscription(subscription);
+    setIsEditModalOpen(true);
   };
 
-  const handleUpdateSubscription = (subscriptionData: Omit<Subscription, 'id'>) => {
-    if (!editingSubscription) return;
-    
+  const handleUpdateSubscription = (subscription: Subscription) => {
     setSubscriptions(prev =>
       prev.map(sub =>
-        sub.id === editingSubscription.id
-          ? { ...subscriptionData, id: editingSubscription.id }
-          : sub
+        sub.id === subscription.id ? subscription : sub
       )
     );
-    setEditingSubscription(undefined);
+    setEditingSubscription(null);
+    setIsEditModalOpen(false);
   };
 
-  const handleDeleteSubscription = (id: string) => {
-    setSubscriptions(prev => prev.filter(sub => sub.id !== id));
+  const handleDeleteSubscription = (subscription: Subscription) => {
+    setDeletingSubscription(subscription);
+    setIsDeleteModalOpen(true);
   };
 
-  const handleCancelEdit = () => {
-    setEditingSubscription(undefined);
+  const handleConfirmDelete = () => {
+    if (deletingSubscription) {
+      setSubscriptions(prev => prev.filter(sub => sub.id !== deletingSubscription.id));
+      setDeletingSubscription(null);
+    }
+  };
+
+  const handleCloseModals = () => {
+    setIsAddModalOpen(false);
+    setIsEditModalOpen(false);
+    setIsDeleteModalOpen(false);
+    setEditingSubscription(null);
+    setDeletingSubscription(null);
   };
 
   return (
@@ -59,16 +75,39 @@ function App() {
 
         <Summary subscriptions={subscriptions} />
 
-        <SubscriptionForm
-          onSubmit={editingSubscription ? handleUpdateSubscription : handleAddSubscription}
-          editingSubscription={editingSubscription}
-          onCancel={handleCancelEdit}
-        />
+        <div className="mb-6">
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          >
+            + サブスクリプションを追加
+          </button>
+        </div>
 
         <SubscriptionList
           subscriptions={subscriptions}
           onEdit={handleEditSubscription}
           onDelete={handleDeleteSubscription}
+        />
+
+        <AddSubscriptionModal
+          isOpen={isAddModalOpen}
+          onClose={handleCloseModals}
+          onAdd={handleAddSubscription}
+        />
+
+        <EditSubscriptionModal
+          isOpen={isEditModalOpen}
+          onClose={handleCloseModals}
+          onUpdate={handleUpdateSubscription}
+          subscription={editingSubscription}
+        />
+
+        <DeleteConfirmModal
+          isOpen={isDeleteModalOpen}
+          onClose={handleCloseModals}
+          onConfirm={handleConfirmDelete}
+          subscription={deletingSubscription}
         />
       </div>
     </div>
