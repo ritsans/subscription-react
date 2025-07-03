@@ -47,22 +47,34 @@ export const SubscriptionFormFields: React.FC<SubscriptionFormFieldsProps> = ({
 
       <div>
         <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-          価格（円）
+          価格
         </label>
-        <input
-          type="number"
-          id="price"
-          value={formData.price}
-          onChange={(e) => handleChange('price', e.target.value)}
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-            errors?.price 
-              ? 'border-red-300 focus:ring-red-500' 
-              : 'border-gray-300 focus:ring-blue-500'
-          }`}
-          placeholder="1000"
-          min="0"
-          step="0.01"
-        />
+        <div className="flex gap-2">
+          <select
+            id="currency"
+            value={formData.currency}
+            onChange={(e) => handleChange('currency', e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="JPY">¥</option>
+            <option value="USD">$</option>
+            <option value="EUR">€</option>
+          </select>
+          <input
+            type="number"
+            id="price"
+            value={formData.price}
+            onChange={(e) => handleChange('price', e.target.value)}
+            className={`flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+              errors?.price 
+                ? 'border-red-300 focus:ring-red-500' 
+                : 'border-gray-300 focus:ring-blue-500'
+            }`}
+            placeholder="1000"
+            min="0"
+            step="0.01"
+          />
+        </div>
         {errors?.price && (
           <p className="mt-1 text-sm text-red-600">{errors.price}</p>
         )}
