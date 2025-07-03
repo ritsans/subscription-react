@@ -17,7 +17,9 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 - `pnpm lint` - Run ESLint on all files with automatic fix
 - `pnpm format` - Format code using Prettier
 - `pnpm preview` - Preview production build locally
-- `npx @tailwindcss/upgrade` - Run the tailwindcss upgrade tool. If styling fails, run this first.
+
+## Custom Tool
+- `npx @tailwindcss/upgrade` - if the tailwindcss styling does not appear as expected, this command should be executed first.
 
 ## Tech Stack
 - **Framework**: React 19 with TypeScript
@@ -43,3 +45,12 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 - TypeScript configuration is split between tsconfig.app.json and tsconfig.node.json
 - Tailwind CSS v4 is configured via Vite plugin rather than traditional config file
 - No test framework currently configured
+
+## Commit Guidelines
+When you are asked to "commit your changes," create the appropriate commit message yourself according to the following rules
+
+- Commit messages are limited to 50 characters
+- The commit message should be in English, short and concise (e.g. fix styling pc-view header)
+
+## Code Comments
+- Short Japanese comments should be added to code that performs important processing. We will try to provide easy-to-understand explanations.
