@@ -15,7 +15,7 @@ function App() {
   const [deletingSubscription, setDeletingSubscription] = useState<Subscription | null>(null);
 
   const generateId = () => {
-    return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    return Date.now().toString() + Math.random().toString(36).slice(2, 11);
   };
 
   const handleAddSubscription = (subscriptionData: Omit<Subscription, 'id'>) => {
