@@ -15,8 +15,18 @@ export default function SubscriptionItem({
     onDelete(subscription);
   };
 
-  const formatPrice = (price: number, cycle: 'monthly' | 'yearly') => {
-    return `¥${price.toLocaleString()} / ${cycle === 'monthly' ? '月' : '年'}`;
+  const getCurrencySymbol = (currency: string) => {
+    switch (currency) {
+      case 'JPY': return '¥';
+      case 'USD': return '$';
+      case 'EUR': return '€';
+      default: return currency;
+    }
+  };
+
+  const formatPrice = (price: number, cycle: 'monthly' | 'yearly', currency: string) => {
+    const symbol = getCurrencySymbol(currency);
+    return `${symbol}${price.toLocaleString()} / ${cycle === 'monthly' ? '月' : '年'}`;
   };
 
   const getMonthlyPrice = (price: number, cycle: 'monthly' | 'yearly') => {
@@ -30,11 +40,11 @@ export default function SubscriptionItem({
           <h3 className="font-semibold text-gray-800">{subscription.name}</h3>
           <div className="flex items-center gap-3 mt-1">
             <span className="text-lg font-bold text-green-600">
-              {formatPrice(subscription.price, subscription.cycle)}
+              {formatPrice(subscription.price, subscription.cycle, subscription.currency)}
             </span>
             {subscription.cycle === 'yearly' && (
               <span className="text-sm text-gray-500">
-                (月額 ¥{Math.round(getMonthlyPrice(subscription.price, subscription.cycle)).toLocaleString()})
+                (月額 {getCurrencySymbol(subscription.currency)}{Math.round(getMonthlyPrice(subscription.price, subscription.cycle)).toLocaleString()})
               </span>
             )}
           </div>

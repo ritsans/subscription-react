@@ -3,10 +3,12 @@ export interface Subscription {
   name: string;
   price: number;
   cycle: 'monthly' | 'yearly';
+  currency: 'JPY' | 'USD' | 'EUR';
 }
 
 export interface SubscriptionFormData {
   name: string;
   price: string;
   cycle: 'monthly' | 'yearly';
+  currency: 'JPY' | 'USD' | 'EUR';
 }

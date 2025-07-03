@@ -19,7 +19,8 @@ export const EditSubscriptionModal: React.FC<EditSubscriptionModalProps> = ({
   const [formData, setFormData] = useState<SubscriptionFormData>({
     name: '',
     price: '',
-    cycle: 'monthly'
+    cycle: 'monthly',
+    currency: 'JPY'
   });
 
   const [errors, setErrors] = useState<{
@@ -32,7 +33,8 @@ export const EditSubscriptionModal: React.FC<EditSubscriptionModalProps> = ({
       setFormData({
         name: subscription.name,
         price: subscription.price.toString(),
-        cycle: subscription.cycle
+        cycle: subscription.cycle,
+        currency: subscription.currency
       });
       setErrors({});
     }
@@ -70,7 +72,8 @@ export const EditSubscriptionModal: React.FC<EditSubscriptionModalProps> = ({
       ...subscription,
       name: formData.name.trim(),
       price,
-      cycle: formData.cycle
+      cycle: formData.cycle,
+      currency: formData.currency
     });
 
     setErrors({});

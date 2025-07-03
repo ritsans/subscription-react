@@ -17,7 +17,8 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
   const [formData, setFormData] = useState<SubscriptionFormData>({
     name: '',
     price: '',
-    cycle: 'monthly'
+    cycle: 'monthly',
+    currency: 'JPY'
   });
 
   const [errors, setErrors] = useState<{
@@ -56,17 +57,18 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
     onAdd({
       name: formData.name.trim(),
       price,
-      cycle: formData.cycle
+      cycle: formData.cycle,
+      currency: formData.currency
     });
 
     // フォームをリセット
-    setFormData({ name: '', price: '', cycle: 'monthly' });
+    setFormData({ name: '', price: '', cycle: 'monthly', currency: 'JPY' });
     setErrors({});
     onClose();
   };
 
   const handleClose = () => {
-    setFormData({ name: '', price: '', cycle: 'monthly' });
+    setFormData({ name: '', price: '', cycle: 'monthly', currency: 'JPY' });
     setErrors({});
     onClose();
   };

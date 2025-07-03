@@ -13,11 +13,12 @@ function App() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
   const [deletingSubscription, setDeletingSubscription] = useState<Subscription | null>(null);
-
+  // setIs~は、モーダルの開閉状態を管理するためのstateです。
+  
   const generateId = () => {
     return Date.now().toString() + Math.random().toString(36).slice(2, 11);
   };
-
+  // handle~ 関数は、ユーザーの操作をに応じて呼び出されるイベントハンドラ。
   const handleAddSubscription = (subscriptionData: Omit<Subscription, 'id'>) => {
     const newSubscription: Subscription = {
       ...subscriptionData,
