@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import type { Subscription } from './types';
-import Summary from './components/Summary';
-import SubscriptionList from './components/SubscriptionList';
+import Header from './components/Header';
+import Main from './components/Main';
+import Footer from './components/Footer';
 import { AddSubscriptionModal } from './components/AddSubscriptionModal';
 import { EditSubscriptionModal } from './components/EditSubscriptionModal';
 import { DeleteConfirmModal } from './components/DeleteConfirmModal';
@@ -116,68 +117,37 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <header className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            サブスクリプション管理
-          </h1>
-          <p className="text-gray-600">
-            毎月の支出を把握して、予算を見直しましょう
-          </p>
-        </header>
+    <div className="min-h-screen flex flex-col">
+      <Header error={error} onCloseError={handleCloseError} />
+      
+      <Main
+        subscriptions={subscriptions}
+        onEdit={handleEditSubscription}
+        onDelete={handleDeleteSubscription}
+        onAddClick={() => setIsAddModalOpen(true)}
+      />
+      
+      <Footer />
 
-        {error && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-            <div className="flex justify-between items-center">
-              <span>{error}</span>
-              <button
-                onClick={handleCloseError}
-                className="text-red-500 hover:text-red-700"
-              >
-                ×
-              </button>
-            </div>
-          </div>
-        )}
+      <AddSubscriptionModal
+        isOpen={isAddModalOpen}
+        onClose={handleCloseModals}
+        onAdd={handleAddSubscription}
+      />
 
-        <Summary subscriptions={subscriptions} />
+      <EditSubscriptionModal
+        isOpen={isEditModalOpen}
+        onClose={handleCloseModals}
+        onUpdate={handleUpdateSubscription}
+        subscription={editingSubscription}
+      />
 
-        <div className="mb-6">
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-          >
-            + サブスクリプションを追加
-          </button>
-        </div>
-
-        <SubscriptionList
-          subscriptions={subscriptions}
-          onEdit={handleEditSubscription}
-          onDelete={handleDeleteSubscription}
-        />
-
-        <AddSubscriptionModal
-          isOpen={isAddModalOpen}
-          onClose={handleCloseModals}
-          onAdd={handleAddSubscription}
-        />
-
-        <EditSubscriptionModal
-          isOpen={isEditModalOpen}
-          onClose={handleCloseModals}
-          onUpdate={handleUpdateSubscription}
-          subscription={editingSubscription}
-        />
-
-        <DeleteConfirmModal
-          isOpen={isDeleteModalOpen}
-          onClose={handleCloseModals}
-          onConfirm={handleConfirmDelete}
-          subscription={deletingSubscription}
-        />
-      </div>
+      <DeleteConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleCloseModals}
+        onConfirm={handleConfirmDelete}
+        subscription={deletingSubscription}
+      />
     </div>
   );
 }
