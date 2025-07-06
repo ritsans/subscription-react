@@ -72,9 +72,11 @@ export default function Summary({ subscriptions }: SummaryProps) {
                 </p>
               </div>
             </div>
+            {/* 登録数をカウントして表示しているけど、今はいらないかも？
             <p className="text-sm text-gray-500 mt-2">
               {name}のサブスクリプション数: {subs.length}個
-            </p>
+            </p> 
+            */}
           </div>
         );
       })}
