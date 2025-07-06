@@ -37,7 +37,14 @@ export default function SubscriptionItem({
     <div className="bg-white p-4 rounded-lg shadow-xs border border-gray-200 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <h3 className="font-semibold text-gray-800">{subscription.name}</h3>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-semibold text-gray-800">{subscription.name}</h3>
+            {subscription.category && (
+              <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">
+                {subscription.category}
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-3 mt-1">
             <span className="text-lg font-bold text-green-600">
               {formatPrice(subscription.price, subscription.cycle, subscription.currency)}
