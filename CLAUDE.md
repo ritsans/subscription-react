@@ -8,6 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - Personal development project for frontend learning purposes
 - Individual learning focus - avoid team development or task delegation suggestions
+- **Application Type**: Subscription management application (personal payment management)
+- **Language**: Japanese UI, Japanese comments used
 
 ## Package Manager
 
@@ -30,6 +32,7 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 - **Framework**: React 19 with TypeScript
 - **Build Tool**: Vite with @vitejs/plugin-react
 - **Styling**: Tailwind CSS v4 with @tailwindcss/vite plugin
+- **Database**: Supabase (PostgreSQL)
 - **Linting**: ESLint with TypeScript and React plugins
 - **Formatting**: Prettier with ESLint integration
 
@@ -66,6 +69,29 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 - TypeScript configuration is split between tsconfig.app.json and tsconfig.node.json
 - Tailwind CSS v4 is configured via Vite plugin rather than traditional config file
 - No test framework currently configured
+
+## Application Architecture
+
+### Data Layer
+- **Supabase PostgreSQL**: Cloud database backend
+- **Table**: `subscriptions` with columns for id, name, price, cycle, currency, category
+- **Environment Variables**: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` required for database connection
+
+### State Management
+- **React useState**: Centralized state management in App.tsx
+- **Service Layer**: `services/subscriptionService.ts` abstracts Supabase operations
+- **Async State**: Loading and error states managed throughout application
+
+### Component Architecture
+- **Layout Components**: Header, Main, Footer
+- **Feature Components**: SubscriptionList, SubscriptionItem, Summary
+- **Modal Components**: AddSubscriptionModal, EditSubscriptionModal, DeleteConfirmModal
+- **Base Components**: BaseModal, SubscriptionFormFields
+
+### Data Flow
+- CRUD operations handled via service layer
+- Type-safe operations with TypeScript interfaces
+- Modal-based UI interactions for data manipulation
 
 ## Commit Guidelines
 
