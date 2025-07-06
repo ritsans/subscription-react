@@ -1,5 +1,6 @@
 import React from 'react';
 import type { SubscriptionFormData } from '../types';
+import { CATEGORIES } from '../types';
 
 interface SubscriptionFormFieldsProps {
   formData: SubscriptionFormData;
@@ -92,6 +93,24 @@ export const SubscriptionFormFields: React.FC<SubscriptionFormFieldsProps> = ({
         >
           <option value="monthly">月額</option>
           <option value="yearly">年額</option>
+        </select>
+      </div>
+
+      <div>
+        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+          カテゴリ
+        </label>
+        <select
+          id="category"
+          value={formData.category}
+          onChange={(e) => handleChange('category', e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          {Object.values(CATEGORIES).map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
         </select>
       </div>
     </div>

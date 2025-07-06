@@ -7,6 +7,7 @@ export interface DatabaseSubscription {
   price: number;
   cycle: 'monthly' | 'yearly';
   currency: 'JPY' | 'USD' | 'EUR';
+  category: string;
   created_at: string;
   updated_at: string;
 }
@@ -28,6 +29,7 @@ export const fetchSubscriptions = async (): Promise<Subscription[]> => {
     price: item.price,
     cycle: item.cycle,
     currency: item.currency,
+    category: item.category || 'カテゴリなし',
   }));
 };
 
@@ -49,6 +51,7 @@ export const createSubscription = async (subscription: Omit<Subscription, 'id'>)
     price: data.price,
     cycle: data.cycle,
     currency: data.currency,
+    category: data.category || 'カテゴリなし',
   };
 };
 
@@ -61,6 +64,7 @@ export const updateSubscription = async (subscription: Subscription): Promise<Su
       price: subscription.price,
       cycle: subscription.cycle,
       currency: subscription.currency,
+      category: subscription.category,
     })
     .eq('id', subscription.id)
     .select()
@@ -76,6 +80,7 @@ export const updateSubscription = async (subscription: Subscription): Promise<Su
     price: data.price,
     cycle: data.cycle,
     currency: data.currency,
+    category: data.category || 'カテゴリなし',
   };
 };
 

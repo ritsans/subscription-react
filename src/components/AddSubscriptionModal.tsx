@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BaseModal } from './BaseModal';
 import { SubscriptionFormFields } from './SubscriptionFormFields';
 import type { Subscription, SubscriptionFormData } from '../types';
+import { CATEGORIES } from '../types';
 
 interface AddSubscriptionModalProps {
   isOpen: boolean;
@@ -18,7 +19,8 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
     name: '',
     price: '',
     cycle: 'monthly',
-    currency: 'JPY'
+    currency: 'JPY',
+    category: CATEGORIES.UNCATEGORIZED
   });
 
   const [errors, setErrors] = useState<{
@@ -58,17 +60,18 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
       name: formData.name.trim(),
       price,
       cycle: formData.cycle,
-      currency: formData.currency
+      currency: formData.currency,
+      category: formData.category
     });
 
     // フォームをリセット
-    setFormData({ name: '', price: '', cycle: 'monthly', currency: 'JPY' });
+    setFormData({ name: '', price: '', cycle: 'monthly', currency: 'JPY', category: CATEGORIES.UNCATEGORIZED });
     setErrors({});
     onClose();
   };
 
   const handleClose = () => {
-    setFormData({ name: '', price: '', cycle: 'monthly', currency: 'JPY' });
+    setFormData({ name: '', price: '', cycle: 'monthly', currency: 'JPY', category: CATEGORIES.UNCATEGORIZED });
     setErrors({});
     onClose();
   };

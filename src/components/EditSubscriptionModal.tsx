@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BaseModal } from './BaseModal';
 import { SubscriptionFormFields } from './SubscriptionFormFields';
 import type { Subscription, SubscriptionFormData } from '../types';
+import { CATEGORIES } from '../types';
 
 interface EditSubscriptionModalProps {
   isOpen: boolean;
@@ -20,7 +21,8 @@ export const EditSubscriptionModal: React.FC<EditSubscriptionModalProps> = ({
     name: '',
     price: '',
     cycle: 'monthly',
-    currency: 'JPY'
+    currency: 'JPY',
+    category: CATEGORIES.UNCATEGORIZED
   });
 
   const [errors, setErrors] = useState<{
@@ -34,7 +36,8 @@ export const EditSubscriptionModal: React.FC<EditSubscriptionModalProps> = ({
         name: subscription.name,
         price: subscription.price.toString(),
         cycle: subscription.cycle,
-        currency: subscription.currency
+        currency: subscription.currency,
+        category: subscription.category || CATEGORIES.UNCATEGORIZED
       });
       setErrors({});
     }
@@ -73,7 +76,8 @@ export const EditSubscriptionModal: React.FC<EditSubscriptionModalProps> = ({
       name: formData.name.trim(),
       price,
       cycle: formData.cycle,
-      currency: formData.currency
+      currency: formData.currency,
+      category: formData.category
     });
 
     setErrors({});
