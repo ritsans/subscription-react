@@ -35,10 +35,6 @@ export default function SubscriptionItem({
     return `${symbol}${price.toLocaleString()} / ${cycle === 'monthly' ? '月' : '年'}`;
   };
 
-  const getMonthlyPrice = (price: number, cycle: 'monthly' | 'yearly') => {
-    return cycle === 'yearly' ? price / 12 : price;
-  };
-
   // 日本円換算の価格を計算
   const formatJPYPrice = (price: number, cycle: 'monthly' | 'yearly') => {
     const convertedPrice = Math.floor(price * rate);
@@ -61,15 +57,11 @@ export default function SubscriptionItem({
             <span className="text-lg font-bold text-green-600">
               {formatPrice(subscription.price, subscription.cycle, subscription.currency)}
             </span>
-            {subscription.cycle === 'yearly' && (
-              <span className="text-sm text-gray-500">
-                (月額 {getCurrencySymbol(subscription.currency)}{Math.round(getMonthlyPrice(subscription.price, subscription.cycle)).toLocaleString()})
-              </span>
-            )}
+
           </div>
           {shouldShowJPY && rate > 0 && (
-            <div className="text-sm text-gray-500 mt-1">
-              (≒ {formatJPYPrice(subscription.price, subscription.cycle)})
+            <div className="text-sm text-blue-500 mt-1">
+              (およそ {formatJPYPrice(subscription.price, subscription.cycle)})
             </div>
           )}
         </div>
