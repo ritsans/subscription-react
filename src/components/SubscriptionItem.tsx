@@ -1,4 +1,6 @@
 import type { Subscription } from '../types';
+import { useExchangeRate } from '../hooks/useExchangeRate';
+import type { Currency } from '../types/exchange';
 
 interface SubscriptionItemProps {
   subscription: Subscription;
@@ -11,6 +13,10 @@ export default function SubscriptionItem({
   onEdit,
   onDelete
 }: SubscriptionItemProps) {
+  // USD/EUR通貨の場合のみ為替レートを取得
+  const shouldShowJPY = subscription.currency === 'USD' || subscription.currency === 'EUR';
+  const { rate } = useExchangeRate(shouldShowJPY ? subscription.currency as Currency : 'USD');
+  
   const handleDelete = () => {
     onDelete(subscription);
   };
@@ -31,6 +37,12 @@ export default function SubscriptionItem({
 
   const getMonthlyPrice = (price: number, cycle: 'monthly' | 'yearly') => {
     return cycle === 'yearly' ? price / 12 : price;
+  };
+
+  // 日本円換算の価格を計算
+  const formatJPYPrice = (price: number, cycle: 'monthly' | 'yearly') => {
+    const convertedPrice = Math.floor(price * rate);
+    return `¥${convertedPrice.toLocaleString()} / ${cycle === 'monthly' ? '月' : '年'}`;
   };
 
   return (
@@ -55,6 +67,11 @@ export default function SubscriptionItem({
               </span>
             )}
           </div>
+          {shouldShowJPY && rate > 0 && (
+            <div className="text-sm text-gray-500 mt-1">
+              (≒ {formatJPYPrice(subscription.price, subscription.cycle)})
+            </div>
+          )}
         </div>
         
         <div className="flex gap-2 ml-4">
