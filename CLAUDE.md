@@ -8,6 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - Personal development project for frontend learning purposes
 - Individual learning focus - avoid team development or task delegation suggestions
+- Subscription management SPA built with React 19 + TypeScript + Tailwind CSS v4
+- Supabase backend for data persistence
 
 ## Package Manager
 
@@ -30,6 +32,7 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 - **Framework**: React 19 with TypeScript
 - **Build Tool**: Vite with @vitejs/plugin-react
 - **Styling**: Tailwind CSS v4 with @tailwindcss/vite plugin
+- **Database**: Supabase (PostgreSQL) with @supabase/supabase-js
 - **Linting**: ESLint with TypeScript and React plugins
 - **Formatting**: Prettier with ESLint integration
 
@@ -39,6 +42,14 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 - Uses project references (tsconfig.json splits into app and node configs)
 - Single-page application structure in src/
 - Tailwind CSS integrated at build level via Vite plugin
+
+### Key Architecture Components
+
+- **App.tsx**: Main application component with subscription state management and modal controls
+- **types.ts**: Core TypeScript definitions for Subscription and SubscriptionFormData
+- **services/subscriptionService.ts**: Supabase database operations (CRUD) for subscriptions
+- **lib/supabase.ts**: Supabase client configuration
+- **components/**: Modal-based UI components following BaseModal pattern
 
 ### Directory Guidelines
 
@@ -65,7 +76,19 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 - ESLint uses the new flat config format (eslint.config.js)
 - TypeScript configuration is split between tsconfig.app.json and tsconfig.node.json
 - Tailwind CSS v4 is configured via Vite plugin rather than traditional config file
+- Supabase environment variables required: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
 - No test framework currently configured
+
+## Database Schema
+
+The application uses a 'subscriptions' table with the following structure:
+- id (string) - Primary key
+- name (string) - Subscription service name
+- price (number) - Monthly/yearly price
+- cycle ('monthly' | 'yearly') - Billing cycle
+- currency ('JPY' | 'USD' | 'EUR') - Currency type
+- category (string) - Service category (see CATEGORIES in types.ts)
+- created_at, updated_at (timestamps) - Audit fields
 
 ## Commit Guidelines
 
