@@ -1,10 +1,14 @@
 import type { Subscription } from '../types';
+import { useExchangeRate } from '../hooks/useExchangeRate';
 
 interface SummaryProps {
   subscriptions: Subscription[];
 }
 
 export default function Summary({ subscriptions }: SummaryProps) {
+  // 為替レートを取得
+  const { rate: usdRate } = useExchangeRate('USD');
+  const { rate: eurRate } = useExchangeRate('EUR');
   // 通貨別にグループ化
   const groupedByCurrency = subscriptions.reduce((groups, subscription) => {
     const currency = subscription.currency;
@@ -46,6 +50,17 @@ export default function Summary({ subscriptions }: SummaryProps) {
     return { monthlyTotal, yearlyTotal: monthlyTotal * 12 };
   };
 
+  // 日本円換算の金額を取得
+  const getJPYConversion = (amount: number, currency: string) => {
+    if (currency === 'JPY') return null;
+    
+    const rate = currency === 'USD' ? usdRate : currency === 'EUR' ? eurRate : 0;
+    if (rate === 0) return null;
+    
+    const converted = Math.floor(amount * rate);
+    return converted;
+  };
+
   return (
     <div className="bg-blue-50 p-6 rounded-lg mb-6">
       <h2 className="text-xl font-bold text-gray-800 mb-4">支出サマリー</h2>
@@ -64,12 +79,22 @@ export default function Summary({ subscriptions }: SummaryProps) {
                 <p className="text-2xl font-bold text-blue-600">
                   {symbol}{Math.round(monthlyTotal).toLocaleString()}
                 </p>
+                {getJPYConversion(monthlyTotal, currency) && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    (およそ ¥{getJPYConversion(monthlyTotal, currency)?.toLocaleString()})
+                  </p>
+                )}
               </div>
               <div className="text-center">
                 <p className="text-sm text-gray-600">年額合計</p>
                 <p className="text-2xl font-bold text-blue-600">
                   {symbol}{Math.round(yearlyTotal).toLocaleString()}
                 </p>
+                {getJPYConversion(yearlyTotal, currency) && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    (およそ ¥{getJPYConversion(yearlyTotal, currency)?.toLocaleString()})
+                  </p>
+                )}
               </div>
             </div>
             {/* 登録数をカウントして表示しているけど、今はいらないかも？
