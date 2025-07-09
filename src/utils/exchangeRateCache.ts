@@ -50,3 +50,19 @@ export const setCachedRate = (currency: Currency, rate: number): void => {
 export const getFallbackRate = (currency: Currency): number => {
   return FALLBACK_RATES[currency];
 };
+
+// キャッシュをクリア（強制的にAPIから最新のレートを取得するため）
+export const clearCachedRate = (currency: Currency): void => {
+  const cacheKey = `exchange_rate_${currency}`;
+  localStorage.removeItem(cacheKey);
+  console.log(`[Exchange Rate] Cleared cache for ${currency}`);
+};
+
+// すべての為替レートキャッシュをクリア
+export const clearAllCachedRates = (): void => {
+  const currencies: Currency[] = ['USD', 'EUR'];
+  currencies.forEach(currency => {
+    clearCachedRate(currency);
+  });
+  console.log('[Exchange Rate] Cleared all exchange rate caches');
+};

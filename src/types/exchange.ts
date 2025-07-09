@@ -27,4 +27,5 @@ export interface UseExchangeRateReturn {
   rate: number;
   isLoading: boolean;
   error: string | null;
+  refetch: () => void;
 }
