@@ -69,6 +69,43 @@ export default function Summary({ subscriptions }: SummaryProps) {
     return converted;
   };
 
+  // 金額を日本円に換算（JPYの場合はそのまま返す）
+  const convertToJPY = (amount: number, currency: string) => {
+    if (currency === 'JPY') return amount;
+    
+    const rate = currency === 'USD' ? usdRate : currency === 'EUR' ? eurRate : 0;
+    if (rate === 0) return 0; // 換算できない場合は0を返す
+    
+    return Math.floor(amount * rate);
+  };
+
+  // 全体合計を計算
+  const calculateGrandTotal = () => {
+    let monthlyTotalJPY = 0;
+    let yearlyTotalJPY = 0;
+    let hasConversionError = false;
+    
+    // 各通貨の合計を日本円に換算して加算
+    Object.entries(groupedByCurrency).forEach(([currency, subs]) => {
+      const { monthlyTotal, yearlyTotal } = calculateTotals(subs);
+      
+      const monthlyJPY = convertToJPY(monthlyTotal, currency);
+      const yearlyJPY = convertToJPY(yearlyTotal, currency);
+      
+      // 換算できない場合（為替レートが0）はエラーフラグを立てる
+      if (currency !== 'JPY' && (monthlyJPY === 0 || yearlyJPY === 0)) {
+        hasConversionError = true;
+      }
+      
+      monthlyTotalJPY += monthlyJPY;
+      yearlyTotalJPY += yearlyJPY;
+    });
+    
+    return { monthlyTotalJPY, yearlyTotalJPY, hasConversionError };
+  };
+
+  const { monthlyTotalJPY, yearlyTotalJPY, hasConversionError } = calculateGrandTotal();
+
   return (
     <div className="bg-blue-50 p-6 rounded-lg mb-6">
       <h2 className="text-xl font-bold text-gray-800 mb-4">支出サマリー</h2>
@@ -105,14 +142,38 @@ export default function Summary({ subscriptions }: SummaryProps) {
                 )}
               </div>
             </div>
-            {/* 登録数をカウントして表示しているけど、今はいらないかも？
-            <p className="text-sm text-gray-500 mt-2">
-              {name}のサブスクリプション数: {subs.length}個
-            </p> 
-            */}
           </div>
         );
       })}
+      
+      {/* 全体合計セクション */}
+      {subscriptions.length > 0 && Object.keys(groupedByCurrency).length > 1 && (
+        <div className="border-t-2 border-gray-200 pt-4 mt-6">
+          <h3 className="text-lg font-semibold text-gray-700 mb-3">全体合計（日本円換算）</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center">
+              <p className="text-sm text-gray-600">月額合計</p>
+              <p className="text-3xl font-bold text-green-600">
+                ¥{monthlyTotalJPY.toLocaleString()}
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-sm text-gray-600">年額合計</p>
+              <p className="text-3xl font-bold text-green-600">
+                ¥{yearlyTotalJPY.toLocaleString()}
+              </p>
+            </div>
+          </div>
+          {hasConversionError && (
+            <p className="text-sm text-orange-600 mt-2 text-center">
+              ※為替レートが取得できませんでした
+            </p>
+          )}
+          <p className="text-xs text-gray-500 mt-2 text-center">
+            ※為替レートは常に変動するため、換算結果はあくまで参考としてお考え下さい。（小数点以下は切り捨て）
+          </p>
+        </div>
+      )}
       
       {subscriptions.length === 0 && (
         <p className="text-gray-500 text-center py-8">
