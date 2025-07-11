@@ -41,13 +41,21 @@ export default function Summary({ subscriptions }: SummaryProps) {
 
   // 各通貨の合計を計算
   const calculateTotals = (subscriptions: Subscription[]) => {
+    // 月額料金サマリー: 月額サブスクリプションのみを合計
     const monthlyTotal = subscriptions.reduce((total, subscription) => {
-      const monthlyPrice = subscription.cycle === 'yearly' 
-        ? subscription.price / 12 
-        : subscription.price;
-      return total + monthlyPrice;
+      return subscription.cycle === 'monthly' 
+        ? total + subscription.price 
+        : total;
     }, 0);
-    return { monthlyTotal, yearlyTotal: monthlyTotal * 12 };
+    
+    // 年額合計サマリー: 年額サブスクリプションのみを合計
+    const yearlyTotal = subscriptions.reduce((total, subscription) => {
+      return subscription.cycle === 'yearly' 
+        ? total + subscription.price 
+        : total;
+    }, 0);
+    
+    return { monthlyTotal, yearlyTotal };
   };
 
   // 日本円換算の金額を取得
