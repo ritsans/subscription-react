@@ -93,7 +93,8 @@ export default function Summary({ subscriptions }: SummaryProps) {
       const yearlyJPY = convertToJPY(yearlyTotal, currency);
       
       // 換算できない場合（為替レートが0）はエラーフラグを立てる
-      if (currency !== 'JPY' && (monthlyJPY === 0 || yearlyJPY === 0)) {
+      const rate = currency === 'USD' ? usdRate : currency === 'EUR' ? eurRate : 0;
+      if (currency !== 'JPY' && rate === 0) {
         hasConversionError = true;
       }
       
