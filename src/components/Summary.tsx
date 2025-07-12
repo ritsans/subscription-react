@@ -107,11 +107,15 @@ export default function Summary({ subscriptions }: SummaryProps) {
 
   const { monthlyTotalJPY, yearlyTotalJPY, hasConversionError } = calculateGrandTotal();
 
+  // サマリーの通貨別表示の表示順序を固定する
+  const currencyOrder = ['JPY', 'USD', 'EUR'] as const;
+
   return (
     <div className="bg-blue-50 p-6 rounded-lg mb-6">
       <h2 className="text-xl font-bold text-gray-800 mb-4">支出サマリー</h2>
       
-      {Object.entries(groupedByCurrency).map(([currency, subs]) => {
+      {currencyOrder.filter(currency => groupedByCurrency[currency]).map(currency => {
+        const subs = groupedByCurrency[currency];
         const { monthlyTotal, yearlyTotal } = calculateTotals(subs);
         const symbol = getCurrencySymbol(currency);
         const name = getCurrencyName(currency);
