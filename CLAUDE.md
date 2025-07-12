@@ -47,8 +47,11 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 
 - **App.tsx**: Main application component with subscription state management and modal controls
 - **types.ts**: Core TypeScript definitions for Subscription and SubscriptionFormData
+- **types/exchange.ts**: Exchange rate related type definitions (Currency, ExchangeRateResponse)
 - **services/subscriptionService.ts**: Supabase database operations (CRUD) for subscriptions
 - **lib/supabase.ts**: Supabase client configuration
+- **hooks/useExchangeRate.ts**: Custom hook for fetching and caching exchange rates from external API
+- **utils/exchangeRateCache.ts**: LocalStorage-based caching system with 24-hour expiration
 - **components/**: Modal-based UI components following BaseModal pattern
 
 ### Directory Guidelines
@@ -77,6 +80,7 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 - TypeScript configuration is split between tsconfig.app.json and tsconfig.node.json
 - Tailwind CSS v4 is configured via Vite plugin rather than traditional config file
 - Supabase environment variables required: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
+- Exchange rate API key required: VITE_EXCHANGE_RATE_API_KEY (for exchange-rate-api.com)
 - No test framework currently configured
 
 ## Application Architecture
@@ -84,12 +88,16 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 ### Data Layer
 - **Supabase PostgreSQL**: Cloud database backend
 - **Table**: `subscriptions` with columns for id, name, price, cycle, currency, category
-- **Environment Variables**: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` required for database connection
+- **Exchange Rate API**: External API (exchange-rate-api.com) for real-time currency conversion
+- **LocalStorage Cache**: 24-hour caching system for exchange rates to minimize API calls
+- **Environment Variables**: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_EXCHANGE_RATE_API_KEY` required
 
 ### State Management
 - **React useState**: Centralized state management in App.tsx
 - **Service Layer**: `services/subscriptionService.ts` abstracts Supabase operations
+- **Custom Hooks**: `useExchangeRate` manages exchange rate fetching, caching, and error handling
 - **Async State**: Loading and error states managed throughout application
+- **Cache Management**: Automatic fallback to cached values with manual refresh capability
 
 ### Component Architecture
 - **Layout Components**: Header, Main, Footer
@@ -101,6 +109,27 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 - CRUD operations handled via service layer
 - Type-safe operations with TypeScript interfaces
 - Modal-based UI interactions for data manipulation
+- Exchange rate data flows: API → Cache → UI with automatic fallback handling
+- Currency display order fixed as JPY → USD → EUR in Summary component
+
+## Multi-Currency Features
+
+### Supported Currencies
+- **JPY (Japanese Yen)**: Base currency, no conversion needed
+- **USD (US Dollar)**: Converted to JPY using real-time exchange rates
+- **EUR (Euro)**: Converted to JPY using real-time exchange rates
+
+### Exchange Rate System
+- **API Integration**: Uses exchange-rate-api.com for real-time rates
+- **Caching Strategy**: 24-hour LocalStorage cache to minimize API calls
+- **Fallback Values**: USD: ¥150, EUR: ¥140 when API is unavailable
+- **Error Handling**: Graceful degradation with cached or fallback rates
+- **Manual Refresh**: Cache clear functionality available in Summary component
+
+### Currency Conversion Logic
+- All amounts rounded down to whole yen (Math.floor)
+- Exchange rates cached with timestamp for efficient retrieval
+- Summary component displays currencies in fixed order: JPY → USD → EUR
 
 ## Commit Guidelines
 
@@ -108,3 +137,9 @@ When you are asked to "commit your changes," create the appropriate commit messa
 
 - Commit messages are limited to 50 characters
 - The commit message should be in English, short and concise (e.g. fix styling pc-view header)
+
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
