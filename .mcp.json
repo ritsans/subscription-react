@@ -3,11 +3,15 @@
     "context7": {
       "type": "stdio",
       "command": "pnpm",
-      "args": [
-        "dlx",
-        "@upstash/context7-mcp@latest"
-      ],
+      "args": ["dlx", "@upstash/context7-mcp@latest"],
       "env": {}
+    },
+    "brave-search": {
+      "command": "pnpm",
+      "args": ["dlx", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "BSADUQrZT09fSTMAQ8SfsvItKBHyDUZ"
+      }
     }
   }
 }
