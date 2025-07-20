@@ -2,9 +2,13 @@ import React from 'react';
 import type { Subscription } from '../types';
 import Summary from './Summary';
 import SubscriptionList from './SubscriptionList';
+import CategoryFilter from './CategoryFilter';
 
 interface MainProps {
   subscriptions: Subscription[];
+  filteredSubscriptions: Subscription[];
+  selectedCategory: string;
+  onCategoryChange: (category: string) => void;
   onEdit: (subscription: Subscription) => void;
   onDelete: (subscription: Subscription) => void;
   onAddClick: () => void;
@@ -12,6 +16,9 @@ interface MainProps {
 
 const Main: React.FC<MainProps> = ({
   subscriptions,
+  filteredSubscriptions,
+  selectedCategory,
+  onCategoryChange,
   onEdit,
   onDelete,
   onAddClick,
@@ -20,6 +27,11 @@ const Main: React.FC<MainProps> = ({
     <main className="flex-1 bg-gray-100">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <Summary subscriptions={subscriptions} />
+
+        <CategoryFilter
+          selectedCategory={selectedCategory}
+          onCategoryChange={onCategoryChange}
+        />
 
         <div className="mb-6">
           <button
@@ -31,7 +43,7 @@ const Main: React.FC<MainProps> = ({
         </div>
 
         <SubscriptionList
-          subscriptions={subscriptions}
+          subscriptions={filteredSubscriptions}
           onEdit={onEdit}
           onDelete={onDelete}
         />

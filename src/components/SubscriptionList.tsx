@@ -28,10 +28,10 @@ export default function SubscriptionList({
     return (
       <div className="bg-gray-50 p-8 rounded-lg text-center">
         <p className="text-gray-500">
-          まだサブスクリプションが登録されていません。
+          該当するサブスクリプションが見つかりません。
         </p>
         <p className="text-sm text-gray-400 mt-1">
-          上のボタンから新しいサブスクリプションを追加してください。
+          カテゴリーを変更するか、新しいサブスクリプションを追加してください。
         </p>
       </div>
     );
@@ -40,7 +40,7 @@ export default function SubscriptionList({
   return (
     <div className="space-y-3">
       <h2 className="text-lg font-bold text-gray-800 mb-4">
-        登録済みサブスクリプション
+        登録済みサブスクリプション ({subscriptions.length}件)
       </h2>
       
       {subscriptions.map((subscription) => (

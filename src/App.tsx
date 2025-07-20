@@ -22,6 +22,7 @@ function App() {
   const [deletingSubscription, setDeletingSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('すべて');
   // setIs~は、モーダルの開閉状態を管理するためのstateです。
   
   // 初期データの取得
@@ -105,6 +106,11 @@ function App() {
     setError(null);
   };
 
+  // カテゴリーフィルタリング処理
+  const filteredSubscriptions = selectedCategory === 'すべて' 
+    ? subscriptions 
+    : subscriptions.filter(sub => sub.category === selectedCategory);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -122,6 +128,9 @@ function App() {
       
       <Main
         subscriptions={subscriptions}
+        filteredSubscriptions={filteredSubscriptions}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
         onEdit={handleEditSubscription}
         onDelete={handleDeleteSubscription}
         onAddClick={() => setIsAddModalOpen(true)}
