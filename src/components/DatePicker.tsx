@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import flatpickr from 'flatpickr';
 import { Japanese } from 'flatpickr/dist/l10n/ja';
 import 'flatpickr/dist/flatpickr.min.css';
@@ -24,6 +24,11 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const flatpickrRef = useRef<flatpickr.Instance | null>(null);
 
+  // onChangeコールバックをメモ化
+  const handleChange = useCallback((_selectedDates: Date[], dateStr: string) => {
+    onChange(dateStr);
+  }, [onChange]);
+
   useEffect(() => {
     if (inputRef.current) {
       // flatpickrインスタンスを初期化
@@ -35,9 +40,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         time_24hr: true, // 24時間形式（時間は使わないが設定）
         showMonths: 1, // 1ヶ月表示
         position: 'auto', // 自動配置
-        onChange: (_, dateStr) => {
-          onChange(dateStr);
-        },
+        onChange: handleChange,
         onClose: () => {
           // カレンダーが閉じられた時の処理
           if (inputRef.current) {
@@ -58,7 +61,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         flatpickrRef.current.destroy();
       }
     };
-  }, []);
+  }, [handleChange, value]);
 
   // value propが変更された時の処理
   useEffect(() => {
