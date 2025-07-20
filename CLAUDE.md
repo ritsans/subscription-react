@@ -101,7 +101,7 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 
 ### Component Architecture
 - **Layout Components**: Header, Main, Footer
-- **Feature Components**: SubscriptionList, SubscriptionItem, Summary
+- **Feature Components**: SubscriptionList, SubscriptionItem, Summary (with collapsible details)
 - **Modal Components**: AddSubscriptionModal, EditSubscriptionModal, DeleteConfirmModal
 - **Base Components**: BaseModal, SubscriptionFormFields
 
@@ -130,6 +130,15 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 - All amounts rounded down to whole yen (Math.floor)
 - Exchange rates cached with timestamp for efficient retrieval
 - Summary component displays currencies in fixed order: JPY → USD → EUR
+
+## UI/UX Design Patterns
+
+### Summary Component Features
+- **Collapsible Details**: Main view shows total amounts only, detailed breakdown accessible via toggle button
+- **Data State Indicators**: Zero amounts display as `--` instead of `$0` or `¥0` to distinguish from actual zero-cost subscriptions
+- **Visual Hierarchy**: Data-present items use bold blue text, no-data items use gray lighter text
+- **Responsive Animation**: CSS transitions with `max-h-[800px]` to accommodate multi-currency displays
+- **State Persistence**: Detail panel state maintained during session (no LocalStorage persistence)
 
 ## Commit Guidelines
 
