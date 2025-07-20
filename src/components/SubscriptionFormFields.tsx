@@ -1,6 +1,7 @@
 import React from 'react';
 import type { SubscriptionFormData } from '../types';
 import { CATEGORIES } from '../types';
+import { DatePicker } from './DatePicker';
 
 interface SubscriptionFormFieldsProps {
   formData: SubscriptionFormData;
@@ -144,16 +145,12 @@ export const SubscriptionFormFields: React.FC<SubscriptionFormFieldsProps> = ({
             <label htmlFor="payment_start_date" className="block text-sm font-medium text-gray-700 mb-1">
               契約開始日
             </label>
-            <input
-              type="date"
+            <DatePicker
               id="payment_start_date"
               value={formData.payment_start_date || ''}
-              onChange={(e) => handleChange('payment_start_date', e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors?.payment_start_date 
-                  ? 'border-red-300 focus:ring-red-500' 
-                  : 'border-gray-300 focus:ring-blue-500'
-              }`}
+              onChange={(date) => handleChange('payment_start_date', date)}
+              error={!!errors?.payment_start_date}
+              placeholder="契約開始日を選択してください"
             />
             {errors?.payment_start_date && (
               <p className="mt-1 text-sm text-red-600">{errors.payment_start_date}</p>
