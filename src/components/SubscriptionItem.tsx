@@ -1,6 +1,7 @@
 import type { Subscription } from '../types';
 import { useExchangeRate } from '../hooks/useExchangeRate';
 import type { Currency } from '../types/exchange';
+import { calculateNextPaymentDate, calculateDaysUntilPayment, getDaysColor, formatDaysText } from '../utils/dateCalculations';
 
 interface SubscriptionItemProps {
   subscription: Subscription;
@@ -41,6 +42,49 @@ export default function SubscriptionItem({
     return `¥${convertedPrice.toLocaleString()} / ${cycle === 'monthly' ? '月' : '年'}`;
   };
 
+  // 次回支払い日と残り日数を計算
+  const getPaymentInfo = () => {
+    // noneパターンの場合は表示しない
+    if (!subscription.payment_pattern || subscription.payment_pattern === 'none') {
+      return null;
+    }
+
+    // パターン別の必要な情報をチェック
+    if (subscription.payment_pattern === 'contract_based' && !subscription.payment_start_date) {
+      return null;
+    }
+    
+    if (subscription.payment_pattern === 'fixed_day' && !subscription.payment_day) {
+      return null;
+    }
+
+    try {
+      const paymentInfo = {
+        paymentStartDate: subscription.payment_pattern === 'contract_based' 
+          ? new Date(subscription.payment_start_date)
+          : new Date(), // fixed_dayの場合は今日の日付を使用（実際の計算では使われない）
+        paymentPattern: subscription.payment_pattern,
+        paymentDay: subscription.payment_day,
+        cycle: subscription.cycle
+      };
+
+      const nextPaymentDate = calculateNextPaymentDate(paymentInfo);
+      const daysUntil = calculateDaysUntilPayment(nextPaymentDate);
+      
+      return {
+        daysUntil,
+        color: getDaysColor(daysUntil),
+        text: formatDaysText(daysUntil)
+      };
+    } catch (error) {
+      // 日付計算でエラーが発生した場合は表示しない
+      console.warn('支払い日計算でエラーが発生しました:', error);
+      return null;
+    }
+  };
+
+  const paymentInfo = getPaymentInfo();
+
   return (
     <div className="bg-white p-4 rounded-lg shadow-xs border border-gray-200 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">
@@ -57,7 +101,14 @@ export default function SubscriptionItem({
             <span className="text-lg font-bold text-green-600">
               {formatPrice(subscription.price, subscription.cycle, subscription.currency)}
             </span>
-
+            {paymentInfo && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-500">次回支払い:</span>
+                <span className={`text-sm font-semibold ${paymentInfo.color}`}>
+                  {paymentInfo.text}
+                </span>
+              </div>
+            )}
           </div>
           {shouldShowJPY && rate > 0 && (
             <div className="text-sm text-blue-500 mt-1">

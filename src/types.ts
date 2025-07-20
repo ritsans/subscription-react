@@ -5,6 +5,9 @@ export interface Subscription {
   cycle: 'monthly' | 'yearly';
   currency: 'JPY' | 'USD' | 'EUR';
   category: string;
+  payment_start_date: string; // ISO date string
+  payment_pattern: 'fixed_day' | 'contract_based' | 'none';
+  payment_day?: number; // 毎月固定日パターンの場合のみ
 }
 
 export interface SubscriptionFormData {
@@ -13,6 +16,9 @@ export interface SubscriptionFormData {
   cycle: 'monthly' | 'yearly';
   currency: 'JPY' | 'USD' | 'EUR';
   category: string;
+  payment_start_date: string; // ISO date string
+  payment_pattern: 'fixed_day' | 'contract_based' | 'none';
+  payment_day?: string; // フォーム用文字列
 }
 
 // カテゴリ定義

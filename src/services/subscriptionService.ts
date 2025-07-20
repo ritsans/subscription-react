@@ -8,6 +8,9 @@ export interface DatabaseSubscription {
   cycle: 'monthly' | 'yearly';
   currency: 'JPY' | 'USD' | 'EUR';
   category: string;
+  payment_start_date?: string;
+  payment_pattern?: 'fixed_day' | 'contract_based' | 'none';
+  payment_day?: number;
   created_at: string;
   updated_at: string;
 }
@@ -30,14 +33,29 @@ export const fetchSubscriptions = async (): Promise<Subscription[]> => {
     cycle: item.cycle,
     currency: item.currency,
     category: item.category || 'カテゴリなし',
+    payment_start_date: item.payment_start_date || '',
+    payment_pattern: item.payment_pattern || 'contract_based',
+    payment_day: item.payment_day,
   }));
 };
 
 // 新しいサブスクリプションを作成
 export const createSubscription = async (subscription: Omit<Subscription, 'id'>): Promise<Subscription> => {
+  // 支払い情報の処理：空文字列やundefinedの場合はnullに変換
+  const insertData = {
+    name: subscription.name,
+    price: subscription.price,
+    cycle: subscription.cycle,
+    currency: subscription.currency,
+    category: subscription.category,
+    payment_start_date: subscription.payment_start_date || null,
+    payment_pattern: subscription.payment_pattern || null,
+    payment_day: subscription.payment_day || null,
+  };
+
   const { data, error } = await supabase
     .from('subscriptions')
-    .insert([subscription])
+    .insert([insertData])
     .select()
     .single();
 
@@ -52,20 +70,29 @@ export const createSubscription = async (subscription: Omit<Subscription, 'id'>)
     cycle: data.cycle,
     currency: data.currency,
     category: data.category || 'カテゴリなし',
+    payment_start_date: data.payment_start_date || '',
+    payment_pattern: data.payment_pattern || 'contract_based',
+    payment_day: data.payment_day,
   };
 };
 
 // サブスクリプションを更新
 export const updateSubscription = async (subscription: Subscription): Promise<Subscription> => {
+  // 支払い情報の処理：空文字列やundefinedの場合はnullに変換
+  const updateData = {
+    name: subscription.name,
+    price: subscription.price,
+    cycle: subscription.cycle,
+    currency: subscription.currency,
+    category: subscription.category,
+    payment_start_date: subscription.payment_start_date || null,
+    payment_pattern: subscription.payment_pattern || null,
+    payment_day: subscription.payment_day || null,
+  };
+
   const { data, error } = await supabase
     .from('subscriptions')
-    .update({
-      name: subscription.name,
-      price: subscription.price,
-      cycle: subscription.cycle,
-      currency: subscription.currency,
-      category: subscription.category,
-    })
+    .update(updateData)
     .eq('id', subscription.id)
     .select()
     .single();
@@ -81,6 +108,9 @@ export const updateSubscription = async (subscription: Subscription): Promise<Su
     cycle: data.cycle,
     currency: data.currency,
     category: data.category || 'カテゴリなし',
+    payment_start_date: data.payment_start_date || '',
+    payment_pattern: data.payment_pattern || 'contract_based',
+    payment_day: data.payment_day,
   };
 };
 

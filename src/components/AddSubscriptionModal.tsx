@@ -20,12 +20,16 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
     price: '',
     cycle: 'monthly',
     currency: 'JPY',
-    category: CATEGORIES.UNCATEGORIZED
+    category: CATEGORIES.UNCATEGORIZED,
+    payment_start_date: '',
+    payment_pattern: 'none'
   });
 
   const [errors, setErrors] = useState<{
     name?: string;
     price?: string;
+    payment_start_date?: string;
+    payment_day?: string;
   }>({});
 
   const validateForm = (): boolean => {
@@ -44,6 +48,15 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
       }
     }
 
+    // 支払い情報のバリデーション（設定する場合のみ）
+    if (formData.payment_pattern === 'contract_based' && formData.payment_start_date && !formData.payment_start_date.trim()) {
+      newErrors.payment_start_date = '契約開始日を入力してください';
+    }
+
+    if (formData.payment_pattern === 'fixed_day' && formData.payment_day && !formData.payment_day.trim()) {
+      newErrors.payment_day = '支払い日を選択してください';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -56,22 +69,45 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
     }
 
     const price = parseFloat(formData.price);
-    onAdd({
+    
+    // 支払い情報の処理
+    const subscriptionData: Omit<Subscription, 'id'> = {
       name: formData.name.trim(),
       price,
       cycle: formData.cycle,
       currency: formData.currency,
-      category: formData.category
-    });
+      category: formData.category,
+      payment_start_date: formData.payment_pattern && formData.payment_pattern !== 'none' && formData.payment_start_date ? formData.payment_start_date : '',
+      payment_pattern: formData.payment_pattern && formData.payment_pattern !== 'none' ? formData.payment_pattern : 'contract_based',
+      payment_day: formData.payment_pattern === 'fixed_day' && formData.payment_day ? parseInt(formData.payment_day) : undefined
+    };
+
+    onAdd(subscriptionData);
 
     // フォームをリセット
-    setFormData({ name: '', price: '', cycle: 'monthly', currency: 'JPY', category: CATEGORIES.UNCATEGORIZED });
+    setFormData({ 
+      name: '', 
+      price: '', 
+      cycle: 'monthly', 
+      currency: 'JPY', 
+      category: CATEGORIES.UNCATEGORIZED,
+      payment_start_date: '',
+      payment_pattern: 'none'
+    });
     setErrors({});
     onClose();
   };
 
   const handleClose = () => {
-    setFormData({ name: '', price: '', cycle: 'monthly', currency: 'JPY', category: CATEGORIES.UNCATEGORIZED });
+    setFormData({ 
+      name: '', 
+      price: '', 
+      cycle: 'monthly', 
+      currency: 'JPY', 
+      category: CATEGORIES.UNCATEGORIZED,
+      payment_start_date: '',
+      payment_pattern: 'none'
+    });
     setErrors({});
     onClose();
   };

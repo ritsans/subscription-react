@@ -47,7 +47,6 @@ export const useExchangeRate = (currency: Currency): UseExchangeRateReturn => {
       // キャッシュから取得を試行
       const cachedRate = getCachedRate(currency);
       if (cachedRate && !forceRefresh) {
-        console.log(`[Exchange Rate] キャッシュを使用中です。`);
         setRate(Math.floor(cachedRate)); // 小数点以下切り捨て
         setIsLoading(false);
         return;
@@ -57,7 +56,6 @@ export const useExchangeRate = (currency: Currency): UseExchangeRateReturn => {
       const fetchedRate = await fetchExchangeRate(currency);
       setCachedRate(currency, fetchedRate);
       setRate(Math.floor(fetchedRate)); // 小数点以下切り捨て
-      console.log(`[Exchange Rate] APIから取得しました。`);
       
     } catch (err) {
       // エラー時は暫定値を使用
@@ -65,7 +63,6 @@ export const useExchangeRate = (currency: Currency): UseExchangeRateReturn => {
       setRate(fallbackRate);
       setError(err instanceof Error ? err.message : 'Unknown error occurred');
       
-      console.warn(`[Exchange Rate] APIエラー:`, err);
     } finally {
       setIsLoading(false);
     }

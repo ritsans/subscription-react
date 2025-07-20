@@ -8,6 +8,8 @@ interface SubscriptionFormFieldsProps {
   errors?: {
     name?: string;
     price?: string;
+    payment_start_date?: string;
+    payment_day?: string;
   };
 }
 
@@ -112,6 +114,86 @@ export const SubscriptionFormFields: React.FC<SubscriptionFormFieldsProps> = ({
             </option>
           ))}
         </select>
+      </div>
+
+      {/* 支払い情報セクション */}
+      <div className="border-t pt-4">
+        <h3 className="text-sm font-medium text-gray-700 mb-3">支払い情報（オプション）</h3>
+        <p className="text-xs text-gray-500 mb-4">
+          次回支払い日の表示を希望する場合は、以下の情報を入力してください。
+        </p>
+
+        <div>
+          <label htmlFor="payment_pattern" className="block text-sm font-medium text-gray-700 mb-1">
+            支払いパターン
+          </label>
+          <select
+            id="payment_pattern"
+            value={formData.payment_pattern || 'none'}
+            onChange={(e) => handleChange('payment_pattern', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="none">設定しない（残り日数表示なし）</option>
+            <option value="contract_based">契約日ベース（Netflix、Spotifyなど）</option>
+            <option value="fixed_day">毎月固定日（電気代、ガス代など）</option>
+          </select>
+        </div>
+
+        {formData.payment_pattern === 'contract_based' && (
+          <div className="mt-4">
+            <label htmlFor="payment_start_date" className="block text-sm font-medium text-gray-700 mb-1">
+              契約開始日
+            </label>
+            <input
+              type="date"
+              id="payment_start_date"
+              value={formData.payment_start_date || ''}
+              onChange={(e) => handleChange('payment_start_date', e.target.value)}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                errors?.payment_start_date 
+                  ? 'border-red-300 focus:ring-red-500' 
+                  : 'border-gray-300 focus:ring-blue-500'
+              }`}
+            />
+            {errors?.payment_start_date && (
+              <p className="mt-1 text-sm text-red-600">{errors.payment_start_date}</p>
+            )}
+            <p className="mt-1 text-xs text-gray-500">
+              例: Netflix契約日、Spotify契約日など
+            </p>
+          </div>
+        )}
+
+        {formData.payment_pattern === 'fixed_day' && (
+          <div className="mt-4">
+            <label htmlFor="payment_day" className="block text-sm font-medium text-gray-700 mb-1">
+              毎月の支払い日
+            </label>
+            <select
+              id="payment_day"
+              value={formData.payment_day || ''}
+              onChange={(e) => handleChange('payment_day', e.target.value)}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                errors?.payment_day 
+                  ? 'border-red-300 focus:ring-red-500' 
+                  : 'border-gray-300 focus:ring-blue-500'
+              }`}
+            >
+              <option value="">選択してください</option>
+              {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
+                <option key={day} value={day.toString()}>
+                  {day}日
+                </option>
+              ))}
+            </select>
+            {errors?.payment_day && (
+              <p className="mt-1 text-sm text-red-600">{errors.payment_day}</p>
+            )}
+            <p className="mt-1 text-xs text-gray-500">
+              例: 電気代は毎月15日、ガス代は毎月25日など
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
