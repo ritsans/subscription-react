@@ -26,6 +26,9 @@ importers:
       tailwindcss:
         specifier: ^4.1.11
         version: 4.1.11
+      tm-odometer:
+        specifier: ^2.0.0
+        version: 2.0.0
     devDependencies:
       '@eslint/js':
         specifier: ^9.25.0
@@ -1762,6 +1765,9 @@ packages:
   tinyglobby@0.2.14:
     resolution: {integrity: sha512-tX5e7OM1HnYr2+a2C/4V0htOcSQcoSTH9KgJnVvNm5zm/cyEWKJ7j7YutsH9CxMdtOkkLFy2AHrMci9IM8IPZQ==}
     engines: {node: '>=12.0.0'}
+
+  tm-odometer@2.0.0:
+    resolution: {integrity: sha512-cjNHYiDmmr9CYN+RD3BkvGOE0k1Jh/v8pDDjbQ5ZwVKW+0sy1NAyHsH457G1vF0E5ZnyqGNCFmJ/K0a1Di91UQ==}
 
   to-regex-range@5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
@@ -3793,6 +3799,8 @@ snapshots:
     dependencies:
       fdir: 6.4.6(picomatch@4.0.2)
       picomatch: 4.0.2
+
+  tm-odometer@2.0.0: {}
 
   to-regex-range@5.0.1:
     dependencies:

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Subscription } from '../types';
 import { useExchangeRate } from '../hooks/useExchangeRate';
+import Odometer from './Odometer';
 
 interface SummaryProps {
   subscriptions: Subscription[];
@@ -162,15 +163,17 @@ export default function Summary({ subscriptions }: SummaryProps) {
           <div className="grid grid-cols-2 gap-6 mb-6">
             <div className="text-center">
               <p className="text-sm text-gray-600 mb-2">月額合計</p>
-              <p className="text-3xl font-bold text-blue-600">
-                ¥{monthlyTotalJPY.toLocaleString()}
-              </p>
+              <div className="text-3xl font-bold text-blue-600 flex items-center justify-center">
+                <span>¥</span>
+                <Odometer value={monthlyTotalJPY} className="text-3xl font-bold text-blue-600" />
+              </div>
             </div>
             <div className="text-center">
               <p className="text-sm text-gray-600 mb-2">年額合計</p>
-              <p className="text-3xl font-bold text-blue-600">
-                ¥{yearlyTotalJPY.toLocaleString()}
-              </p>
+              <div className="text-3xl font-bold text-blue-600 flex items-center justify-center">
+                <span>¥</span>
+                <Odometer value={yearlyTotalJPY} className="text-3xl font-bold text-blue-600" />
+              </div>
             </div>
           </div>
 
