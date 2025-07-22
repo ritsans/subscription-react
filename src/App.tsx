@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { QueryClientProvider } from '@tanstack/react-query';
 import type { Subscription } from './types';
 import Header from './components/Header';
 import Main from './components/Main';
@@ -8,56 +9,45 @@ import { EditSubscriptionModal } from './components/EditSubscriptionModal';
 import { DeleteConfirmModal } from './components/DeleteConfirmModal';
 import { Toast } from './components/Toast';
 import { useToast } from './hooks/useToast';
+import { queryClient } from './lib/queryClient';
 import { 
-  fetchSubscriptions, 
-  createSubscription, 
-  updateSubscription, 
-  deleteSubscription 
-} from './services/subscriptionService';
+  useSubscriptions, 
+  useCreateSubscription, 
+  useUpdateSubscription, 
+  useDeleteSubscription 
+} from './hooks/useSubscriptions';
 
-function App() {
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+const AppContent = () => {
+  // TanStack Queryフック
+  const { data: subscriptions = [], isLoading, error } = useSubscriptions();
+  const createMutation = useCreateSubscription();
+  const updateMutation = useUpdateSubscription();
+  const deleteMutation = useDeleteSubscription();
+
+  // UIの状態管理（モーダル表示等）
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
   const [deletingSubscription, setDeletingSubscription] = useState<Subscription | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('すべて');
   const { toast, showSuccess, showError, hideToast } = useToast();
-  // setIs~は、モーダルの開閉状態を管理するためのstateです。
-  
-  // 初期データの取得
-  useEffect(() => {
-    const loadSubscriptions = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const data = await fetchSubscriptions();
-        setSubscriptions(data);
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'データの取得に失敗しました';
-        setError(errorMessage);
-        showError(errorMessage);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // エラー処理 - TanStack Queryのエラーをtoastで表示
+  if (error) {
+    showError(error instanceof Error ? error.message : 'データの取得に失敗しました');
+  }
 
-    loadSubscriptions();
-  }, [showError]);
-
-  // handle~ 関数は、ユーザーの操作をに応じて呼び出されるイベントハンドラ。
+  // handle~ 関数は、ユーザーの操作に応じて呼び出されるイベントハンドラ
   const handleAddSubscription = async (subscriptionData: Omit<Subscription, 'id'>) => {
-    try {
-      const newSubscription = await createSubscription(subscriptionData);
-      setSubscriptions(prev => [...prev, newSubscription]);
-      showSuccess(`${newSubscription.name} を追加しました`);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'サブスクリプションの追加に失敗しました';
-      showError(errorMessage);
-    }
+    createMutation.mutate(subscriptionData, {
+      onSuccess: (newSubscription) => {
+        showSuccess(`${newSubscription.name} を追加しました`);
+      },
+      onError: (err) => {
+        const errorMessage = err instanceof Error ? err.message : 'サブスクリプションの追加に失敗しました';
+        showError(errorMessage);
+      },
+    });
   };
 
   const handleEditSubscription = (subscription: Subscription) => {
@@ -66,20 +56,17 @@ function App() {
   };
 
   const handleUpdateSubscription = async (subscription: Subscription) => {
-    try {
-      const updatedSubscription = await updateSubscription(subscription);
-      setSubscriptions(prev =>
-        prev.map(sub =>
-          sub.id === subscription.id ? updatedSubscription : sub
-        )
-      );
-      setEditingSubscription(null);
-      setIsEditModalOpen(false);
-      showSuccess(`${updatedSubscription.name} を更新しました`);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'サブスクリプションの更新に失敗しました';
-      showError(errorMessage);
-    }
+    updateMutation.mutate(subscription, {
+      onSuccess: (updatedSubscription) => {
+        setEditingSubscription(null);
+        setIsEditModalOpen(false);
+        showSuccess(`${updatedSubscription.name} を更新しました`);
+      },
+      onError: (err) => {
+        const errorMessage = err instanceof Error ? err.message : 'サブスクリプションの更新に失敗しました';
+        showError(errorMessage);
+      },
+    });
   };
 
   const handleDeleteSubscription = (subscription: Subscription) => {
@@ -89,16 +76,17 @@ function App() {
 
   const handleConfirmDelete = async () => {
     if (deletingSubscription) {
-      try {
-        await deleteSubscription(deletingSubscription.id);
-        setSubscriptions(prev => prev.filter(sub => sub.id !== deletingSubscription.id));
-        showSuccess(`${deletingSubscription.name} を削除しました`);
-        setDeletingSubscription(null);
-        setIsDeleteModalOpen(false);
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'サブスクリプションの削除に失敗しました';
-        showError(errorMessage);
-      }
+      deleteMutation.mutate(deletingSubscription.id, {
+        onSuccess: () => {
+          showSuccess(`${deletingSubscription.name} を削除しました`);
+          setDeletingSubscription(null);
+          setIsDeleteModalOpen(false);
+        },
+        onError: (err) => {
+          const errorMessage = err instanceof Error ? err.message : 'サブスクリプションの削除に失敗しました';
+          showError(errorMessage);
+        },
+      });
     }
   };
 
@@ -110,9 +98,10 @@ function App() {
     setDeletingSubscription(null);
   };
 
-  // エラー表示のリセット
+  // エラー表示のリセット（TanStack Queryではquery client経由でリセット）
   const handleCloseError = () => {
-    setError(null);
+    // エラーの詳細表示は主にtoast側で管理
+    hideToast();
   };
 
   // カテゴリーフィルタリング処理
@@ -133,7 +122,7 @@ function App() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header error={error} onCloseError={handleCloseError} />
+      <Header error={error instanceof Error ? error.message : null} onCloseError={handleCloseError} />
       
       <Main
         subscriptions={subscriptions}
@@ -176,6 +165,15 @@ function App() {
         />
       )}
     </div>
+  );
+};
+
+// メインAppコンポーネントはQueryClientProviderでラップ
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AppContent />
+    </QueryClientProvider>
   );
 }
 
