@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import 'tm-odometer/themes/odometer-theme-default.css';
 
 body {
   margin: 0;
