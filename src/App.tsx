@@ -8,8 +8,11 @@ import { AddSubscriptionModal } from './components/AddSubscriptionModal';
 import { EditSubscriptionModal } from './components/EditSubscriptionModal';
 import { DeleteConfirmModal } from './components/DeleteConfirmModal';
 import { Toast } from './components/Toast';
+import { LoginForm } from './components/LoginForm';
+import { WelcomePage } from './components/WelcomePage';
 import { useToast } from './hooks/useToast';
 import { queryClient } from './lib/queryClient';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { 
   useSubscriptions, 
   useCreateSubscription, 
@@ -18,7 +21,9 @@ import {
 } from './hooks/useSubscriptions';
 
 const AppContent = () => {
-  // TanStack Queryフック
+  const { user, loading: authLoading, signOut } = useAuth();
+  
+  // TanStack Queryフック（認証済みユーザーのみ）
   const { data: subscriptions = [], isLoading, error } = useSubscriptions();
   const createMutation = useCreateSubscription();
   const updateMutation = useUpdateSubscription();
@@ -31,10 +36,76 @@ const AppContent = () => {
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
   const [deletingSubscription, setDeletingSubscription] = useState<Subscription | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('すべて');
+  const [showLogin, setShowLogin] = useState(false);
   const { toast, showSuccess, showError, hideToast } = useToast();
+  // 認証関連のハンドラー
+  const handleLoginSuccess = () => {
+    setShowLogin(false);
+    showSuccess('ログインしました');
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      showSuccess('ログアウトしました');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'ログアウトに失敗しました';
+      showError(errorMessage);
+    }
+  };
+
   // エラー処理 - TanStack Queryのエラーをtoastで表示
-  if (error) {
+  if (error && user) {
     showError(error instanceof Error ? error.message : 'データの取得に失敗しました');
+  }
+
+  // 認証ローディング中の表示
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">認証状態を確認中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 未認証の場合の表示
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        {showLogin ? (
+          <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="w-full max-w-md">
+              <button
+                onClick={() => setShowLogin(false)}
+                className="mb-4 text-blue-600 hover:text-blue-800 flex items-center"
+              >
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                戻る
+              </button>
+              <LoginForm onLoginSuccess={handleLoginSuccess} />
+            </div>
+          </div>
+        ) : (
+          <div className="relative">
+            <WelcomePage />
+            {/* ログインボタン */}
+            <div className="fixed top-4 right-4">
+              <button
+                onClick={() => setShowLogin(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200 shadow-md"
+              >
+                ログイン
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
   }
 
   // handle~ 関数は、ユーザーの操作に応じて呼び出されるイベントハンドラ
@@ -122,7 +193,12 @@ const AppContent = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header error={error instanceof Error ? error.message : null} onCloseError={handleCloseError} />
+      <Header 
+        error={error instanceof Error ? error.message : null} 
+        onCloseError={handleCloseError}
+        user={user}
+        onLogout={handleLogout}
+      />
       
       <Main
         subscriptions={subscriptions}
@@ -168,12 +244,14 @@ const AppContent = () => {
   );
 };
 
-// メインAppコンポーネントはQueryClientProviderでラップ
+// メインAppコンポーネントはAuthProviderとQueryClientProviderでラップ
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AppContent />
-    </QueryClientProvider>
+    <AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <AppContent />
+      </QueryClientProvider>
+    </AuthProvider>
   );
 }
 

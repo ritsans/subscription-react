@@ -33,3 +33,22 @@ export const CATEGORIES = {
   CLOUD: 'クラウド',
   OTHER: 'その他'
 } as const;
+
+// 認証関連の型定義
+export interface User {
+  id: string;
+  email: string;
+  email_confirmed_at: string | null;
+  created_at: string;
+}
+
+export interface AuthState {
+  user: User | null;
+  loading: boolean;
+}
+
+export interface LoginFormData {
+  email: string;
+  password: string;
+  rememberEmail?: boolean;
+}

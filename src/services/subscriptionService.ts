@@ -3,6 +3,7 @@ import type { Subscription } from '../types';
 
 export interface DatabaseSubscription {
   id: string;
+  user_id: string; // ユーザーIDを追加
   name: string;
   price: number;
   cycle: 'monthly' | 'yearly';
@@ -15,11 +16,19 @@ export interface DatabaseSubscription {
   updated_at: string;
 }
 
-// Supabaseからサブスクリプション一覧を取得
+// Supabaseからサブスクリプション一覧を取得（ユーザー固有）
 export const fetchSubscriptions = async (): Promise<Subscription[]> => {
+  // 現在のユーザーを確認
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  
+  if (authError || !user) {
+    throw new Error('認証が必要です');
+  }
+
   const { data, error } = await supabase
     .from('subscriptions')
     .select('*')
+    .eq('user_id', user.id) // ユーザー固有のデータのみ取得
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -41,8 +50,16 @@ export const fetchSubscriptions = async (): Promise<Subscription[]> => {
 
 // 新しいサブスクリプションを作成
 export const createSubscription = async (subscription: Omit<Subscription, 'id'>): Promise<Subscription> => {
+  // 現在のユーザーを確認
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  
+  if (authError || !user) {
+    throw new Error('認証が必要です');
+  }
+
   // 支払い情報の処理：空文字列やundefinedの場合はnullに変換
   const insertData = {
+    user_id: user.id, // ユーザーIDを追加
     name: subscription.name,
     price: subscription.price,
     cycle: subscription.cycle,
@@ -78,6 +95,13 @@ export const createSubscription = async (subscription: Omit<Subscription, 'id'>)
 
 // サブスクリプションを更新
 export const updateSubscription = async (subscription: Subscription): Promise<Subscription> => {
+  // 現在のユーザーを確認
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  
+  if (authError || !user) {
+    throw new Error('認証が必要です');
+  }
+
   // 支払い情報の処理：空文字列やundefinedの場合はnullに変換
   const updateData = {
     name: subscription.name,
@@ -94,6 +118,7 @@ export const updateSubscription = async (subscription: Subscription): Promise<Su
     .from('subscriptions')
     .update(updateData)
     .eq('id', subscription.id)
+    .eq('user_id', user.id) // ユーザー固有の制約を追加
     .select()
     .single();
 
@@ -116,10 +141,18 @@ export const updateSubscription = async (subscription: Subscription): Promise<Su
 
 // サブスクリプションを削除
 export const deleteSubscription = async (id: string): Promise<void> => {
+  // 現在のユーザーを確認
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  
+  if (authError || !user) {
+    throw new Error('認証が必要です');
+  }
+
   const { error } = await supabase
     .from('subscriptions')
     .delete()
-    .eq('id', id);
+    .eq('id', id)
+    .eq('user_id', user.id); // ユーザー固有の制約を追加
 
   if (error) {
     throw new Error(`Failed to delete subscription: ${error.message}`);
