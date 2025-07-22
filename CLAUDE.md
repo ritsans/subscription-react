@@ -32,7 +32,9 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 - **Framework**: React 19 with TypeScript
 - **Build Tool**: Vite with @vitejs/plugin-react
 - **Styling**: Tailwind CSS v4 with @tailwindcss/vite plugin
-- **Database**: Supabase (PostgreSQL)
+- **Database**: Supabase (PostgreSQL) with Row Level Security (RLS)
+- **Authentication**: Supabase Auth with email/password
+- **State Management**: TanStack Query v5 for server state, React Context for auth state
 - **Linting**: ESLint with TypeScript and React plugins
 - **Formatting**: Prettier with ESLint integration
 
@@ -45,14 +47,17 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 
 ### Key Architecture Components
 
-- **App.tsx**: Main application component with subscription state management and modal controls
-- **types.ts**: Core TypeScript definitions for Subscription and SubscriptionFormData
+- **App.tsx**: Main application component with authentication routing and subscription state management
+- **types.ts**: Core TypeScript definitions for Subscription, SubscriptionFormData, and authentication types (User, AuthState, LoginFormData)
 - **types/exchange.ts**: Exchange rate related type definitions (Currency, ExchangeRateResponse)
-- **services/subscriptionService.ts**: Supabase database operations (CRUD) for subscriptions
+- **contexts/AuthContext.tsx**: Global authentication state management with React Context
+- **services/authService.ts**: Supabase Authentication service with email/password login and email memory
+- **services/subscriptionService.ts**: User-specific Supabase database operations (CRUD) with authentication checks
 - **lib/supabase.ts**: Supabase client configuration
 - **hooks/useExchangeRate.ts**: Custom hook for fetching and caching exchange rates from external API
+- **hooks/useSubscriptions.ts**: TanStack Query hooks with optimistic updates for subscription operations
 - **utils/exchangeRateCache.ts**: LocalStorage-based caching system with 24-hour expiration
-- **components/**: Modal-based UI components following BaseModal pattern
+- **components/**: Modal-based UI components following BaseModal pattern, plus authentication components (LoginForm, WelcomePage)
 
 ### Directory Guidelines
 
@@ -86,31 +91,66 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 ## Application Architecture
 
 ### Data Layer
-- **Supabase PostgreSQL**: Cloud database backend
-- **Table**: `subscriptions` with columns for id, name, price, cycle, currency, category
+- **Supabase PostgreSQL**: Cloud database backend with Row Level Security (RLS) enabled
+- **Table**: `subscriptions` with columns for id, user_id, name, price, cycle, currency, category, payment fields
+- **Authentication**: Supabase Auth manages user sessions and JWT tokens
+- **User Isolation**: RLS policies ensure users can only access their own subscription data
 - **Exchange Rate API**: External API (exchange-rate-api.com) for real-time currency conversion
-- **LocalStorage Cache**: 24-hour caching system for exchange rates to minimize API calls
+- **LocalStorage Cache**: 24-hour caching system for exchange rates + remembered email addresses
 - **Environment Variables**: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_EXCHANGE_RATE_API_KEY` required
 
 ### State Management
-- **React useState**: Centralized state management in App.tsx
-- **Service Layer**: `services/subscriptionService.ts` abstracts Supabase operations
-- **Custom Hooks**: `useExchangeRate` manages exchange rate fetching, caching, and error handling
-- **Async State**: Loading and error states managed throughout application
-- **Cache Management**: Automatic fallback to cached values with manual refresh capability
+- **Authentication State**: React Context (AuthContext) manages global user state and auth operations
+- **Server State**: TanStack Query for subscription data with optimistic updates and automatic caching
+- **UI State**: React useState for modals, forms, and component-specific state
+- **Service Layer**: `services/subscriptionService.ts` and `services/authService.ts` abstract Supabase operations
+- **Custom Hooks**: `useAuth` for authentication, `useSubscriptions` for data operations, `useExchangeRate` for currency conversion
+- **Async State**: Loading and error states managed by TanStack Query and auth context
+- **Cache Management**: Query invalidation, optimistic updates, and automatic background refetching
 
 ### Component Architecture
-- **Layout Components**: Header, Main, Footer
+- **Authentication Components**: LoginForm, WelcomePage for unauthenticated users
+- **Layout Components**: Header (with user info and logout), Main, Footer
 - **Feature Components**: SubscriptionList, SubscriptionItem, Summary (with collapsible details)
 - **Modal Components**: AddSubscriptionModal, EditSubscriptionModal, DeleteConfirmModal
 - **Base Components**: BaseModal, SubscriptionFormFields
+- **Context Providers**: AuthProvider wraps entire app, QueryClientProvider for TanStack Query
 
 ### Data Flow
-- CRUD operations handled via service layer
-- Type-safe operations with TypeScript interfaces
-- Modal-based UI interactions for data manipulation
-- Exchange rate data flows: API → Cache → UI with automatic fallback handling
-- Currency display order fixed as JPY → USD → EUR in Summary component
+- **Authentication Flow**: Login → AuthContext → Protected Routes → User-specific data access
+- **CRUD Operations**: UI → TanStack Query hooks → Service layer → Supabase with user validation
+- **Optimistic Updates**: Immediate UI feedback with automatic rollback on errors
+- **Type Safety**: End-to-end TypeScript interfaces from database to UI components
+- **Multi-user Isolation**: RLS policies ensure data separation at database level
+- **Exchange Rate Flow**: API → LocalStorage Cache → UI with automatic fallback handling
+
+## Authentication System
+
+### User Authentication
+- **Login Method**: Email and password authentication via Supabase Auth
+- **Email Memory**: Optional email address persistence in LocalStorage
+- **Session Management**: Automatic session handling with auth state change listeners
+- **Protected Routes**: Unauthenticated users see WelcomePage, authenticated users access main app
+- **User Context**: Global authentication state available via useAuth() hook
+
+### Data Security
+- **Row Level Security (RLS)**: Database-level user isolation for all subscription data
+- **User-Specific Operations**: All CRUD operations automatically filtered by user_id
+- **Authentication Validation**: Service layer validates user authentication before database operations
+- **Automatic User Association**: New subscriptions automatically linked to current authenticated user
+
+### Database Schema Requirements
+```sql
+-- subscriptions table must include user_id column
+ALTER TABLE subscriptions ADD COLUMN user_id uuid REFERENCES auth.users(id);
+
+-- RLS must be enabled
+ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
+
+-- Policy for user data isolation
+CREATE POLICY "Users can only access their own subscriptions" 
+ON subscriptions FOR ALL USING (auth.uid() = user_id);
+```
 
 ## Multi-Currency Features
 
