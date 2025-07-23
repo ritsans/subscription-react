@@ -1,255 +1,35 @@
-import { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
-import type { Subscription } from './types';
-import Header from './components/Header';
-import Main from './components/Main';
-import Footer from './components/Footer';
-import { AddSubscriptionModal } from './components/AddSubscriptionModal';
-import { EditSubscriptionModal } from './components/EditSubscriptionModal';
-import { DeleteConfirmModal } from './components/DeleteConfirmModal';
-import { Toast } from './components/Toast';
-import { LoginForm } from './components/LoginForm';
-import { WelcomePage } from './components/WelcomePage';
-import { useToast } from './hooks/useToast';
 import { queryClient } from './lib/queryClient';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { 
-  useSubscriptions, 
-  useCreateSubscription, 
-  useUpdateSubscription, 
-  useDeleteSubscription 
-} from './hooks/useSubscriptions';
+import { AuthProvider } from './contexts/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { TopPage } from './pages/TopPage';
+import { LoginPage } from './pages/LoginPage';
+import { SignupPage } from './pages/SignupPage';
+import { DashboardPage } from './pages/DashboardPage';
 
-const AppContent = () => {
-  const { user, loading: authLoading, signOut } = useAuth();
-  
-  // TanStack Queryフック（認証済みユーザーのみ）
-  const { data: subscriptions = [], isLoading, error } = useSubscriptions();
-  const createMutation = useCreateSubscription();
-  const updateMutation = useUpdateSubscription();
-  const deleteMutation = useDeleteSubscription();
-
-  // UIの状態管理（モーダル表示等）
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
-  const [deletingSubscription, setDeletingSubscription] = useState<Subscription | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string>('すべて');
-  const [showLogin, setShowLogin] = useState(false);
-  const { toast, showSuccess, showError, hideToast } = useToast();
-  // 認証関連のハンドラー
-  const handleLoginSuccess = () => {
-    setShowLogin(false);
-    showSuccess('ログインしました');
-  };
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      showSuccess('ログアウトしました');
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'ログアウトに失敗しました';
-      showError(errorMessage);
-    }
-  };
-
-  // エラー処理 - TanStack Queryのエラーをtoastで表示
-  if (error && user) {
-    showError(error instanceof Error ? error.message : 'データの取得に失敗しました');
-  }
-
-  // 認証ローディング中の表示
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">認証状態を確認中...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // 未認証の場合の表示
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        {showLogin ? (
-          <div className="min-h-screen flex items-center justify-center p-4">
-            <div className="w-full max-w-md">
-              <button
-                onClick={() => setShowLogin(false)}
-                className="mb-4 text-blue-600 hover:text-blue-800 flex items-center"
-              >
-                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                戻る
-              </button>
-              <LoginForm onLoginSuccess={handleLoginSuccess} />
-            </div>
-          </div>
-        ) : (
-          <div className="relative">
-            <WelcomePage />
-            {/* ログインボタン */}
-            <div className="fixed top-4 right-4">
-              <button
-                onClick={() => setShowLogin(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200 shadow-md"
-              >
-                ログイン
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // handle~ 関数は、ユーザーの操作に応じて呼び出されるイベントハンドラ
-  const handleAddSubscription = async (subscriptionData: Omit<Subscription, 'id'>) => {
-    createMutation.mutate(subscriptionData, {
-      onSuccess: (newSubscription) => {
-        showSuccess(`${newSubscription.name} を追加しました`);
-      },
-      onError: (err) => {
-        const errorMessage = err instanceof Error ? err.message : 'サブスクリプションの追加に失敗しました';
-        showError(errorMessage);
-      },
-    });
-  };
-
-  const handleEditSubscription = (subscription: Subscription) => {
-    setEditingSubscription(subscription);
-    setIsEditModalOpen(true);
-  };
-
-  const handleUpdateSubscription = async (subscription: Subscription) => {
-    updateMutation.mutate(subscription, {
-      onSuccess: (updatedSubscription) => {
-        setEditingSubscription(null);
-        setIsEditModalOpen(false);
-        showSuccess(`${updatedSubscription.name} を更新しました`);
-      },
-      onError: (err) => {
-        const errorMessage = err instanceof Error ? err.message : 'サブスクリプションの更新に失敗しました';
-        showError(errorMessage);
-      },
-    });
-  };
-
-  const handleDeleteSubscription = (subscription: Subscription) => {
-    setDeletingSubscription(subscription);
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (deletingSubscription) {
-      deleteMutation.mutate(deletingSubscription.id, {
-        onSuccess: () => {
-          showSuccess(`${deletingSubscription.name} を削除しました`);
-          setDeletingSubscription(null);
-          setIsDeleteModalOpen(false);
-        },
-        onError: (err) => {
-          const errorMessage = err instanceof Error ? err.message : 'サブスクリプションの削除に失敗しました';
-          showError(errorMessage);
-        },
-      });
-    }
-  };
-
-  const handleCloseModals = () => {
-    setIsAddModalOpen(false);
-    setIsEditModalOpen(false);
-    setIsDeleteModalOpen(false);
-    setEditingSubscription(null);
-    setDeletingSubscription(null);
-  };
-
-  // エラー表示のリセット（TanStack Queryではquery client経由でリセット）
-  const handleCloseError = () => {
-    // エラーの詳細表示は主にtoast側で管理
-    hideToast();
-  };
-
-  // カテゴリーフィルタリング処理
-  const filteredSubscriptions = selectedCategory === 'すべて' 
-    ? subscriptions 
-    : subscriptions.filter(sub => sub.category === selectedCategory);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">データを読み込み中...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Header 
-        error={error instanceof Error ? error.message : null} 
-        onCloseError={handleCloseError}
-        user={user}
-        onLogout={handleLogout}
-      />
-      
-      <Main
-        subscriptions={subscriptions}
-        filteredSubscriptions={filteredSubscriptions}
-        selectedCategory={selectedCategory}
-        onCategoryChange={setSelectedCategory}
-        onEdit={handleEditSubscription}
-        onDelete={handleDeleteSubscription}
-        onAddClick={() => setIsAddModalOpen(true)}
-      />
-      
-      <Footer />
-
-      <AddSubscriptionModal
-        isOpen={isAddModalOpen}
-        onClose={handleCloseModals}
-        onAdd={handleAddSubscription}
-      />
-
-      <EditSubscriptionModal
-        isOpen={isEditModalOpen}
-        onClose={handleCloseModals}
-        onUpdate={handleUpdateSubscription}
-        subscription={editingSubscription}
-      />
-
-      <DeleteConfirmModal
-        isOpen={isDeleteModalOpen}
-        onClose={handleCloseModals}
-        onConfirm={handleConfirmDelete}
-        subscription={deletingSubscription}
-      />
-
-      {toast && (
-        <Toast
-          type={toast.type}
-          message={toast.message}
-          isVisible={toast.isVisible}
-          onClose={hideToast}
-        />
-      )}
-    </div>
-  );
-};
-
-// メインAppコンポーネントはAuthProviderとQueryClientProviderでラップ
+/**
+ * メインAppコンポーネント
+ * React Router、AuthProvider、QueryClientProviderでラップした
+ * ルーティングベースのアプリケーション
+ */
 function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClient}>
-        <AppContent />
+        <Routes>
+          <Route path="/" element={<TopPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            } 
+          />
+        </Routes>
       </QueryClientProvider>
     </AuthProvider>
   );
