@@ -24,20 +24,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 初回ロード時に現在の認証状態を確認
-    const checkUser = async () => {
+    // Supabaseベストプラクティス: getSession()で初期セッション取得後、onAuthStateChangeでリスニング
+    const initializeAuth = async () => {
       try {
         const currentUser = await AuthService.getCurrentUser();
         setUser(currentUser);
       } catch (error) {
         console.error('ユーザー情報の取得に失敗:', error);
         setUser(null);
-      } finally {
-        setLoading(false);
       }
+      setLoading(false);
     };
 
-    checkUser();
+    initializeAuth();
 
     // 認証状態の変更を監視
     const { data: { subscription } } = AuthService.onAuthStateChange((user) => {

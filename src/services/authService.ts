@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { User, LoginFormData } from '../types';
 
 /**
@@ -29,16 +30,12 @@ export class AuthService {
       localStorage.removeItem('remembered_email');
     }
 
-    return {
-      id: data.user.id,
-      email: data.user.email!,
-      email_confirmed_at: data.user.email_confirmed_at,
-      created_at: data.user.created_at!,
-    };
+    return this.transformUser(data.user);
   }
 
   /**
-   * ユーザー登録処理
+   * ユーザー登録処理（将来の拡張用）
+   * 現在はUIでは未使用
    */
   static async signUp(email: string, password: string): Promise<User> {
     const { data, error } = await supabase.auth.signUp({
@@ -54,12 +51,7 @@ export class AuthService {
       throw new Error('ユーザー情報の取得に失敗しました');
     }
 
-    return {
-      id: data.user.id,
-      email: data.user.email!,
-      email_confirmed_at: data.user.email_confirmed_at,
-      created_at: data.user.created_at!,
-    };
+    return this.transformUser(data.user);
   }
 
   /**
@@ -74,25 +66,20 @@ export class AuthService {
   }
 
   /**
-   * 現在のユーザー情報を取得
+   * セッションから現在のユーザー情報を取得
    */
   static async getCurrentUser(): Promise<User | null> {
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const { data: { session }, error } = await supabase.auth.getSession();
     
     if (error) {
-      throw new Error(`ユーザー情報の取得に失敗しました: ${error.message}`);
+      throw new Error(`セッション情報の取得に失敗しました: ${error.message}`);
     }
 
-    if (!user) {
+    if (!session?.user) {
       return null;
     }
 
-    return {
-      id: user.id,
-      email: user.email!,
-      email_confirmed_at: user.email_confirmed_at,
-      created_at: user.created_at!,
-    };
+    return this.transformUser(session.user);
   }
 
   /**
@@ -106,18 +93,22 @@ export class AuthService {
    * 認証状態の変更を監視
    */
   static onAuthStateChange(callback: (user: User | null) => void) {
-    return supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        const user: User = {
-          id: session.user.id,
-          email: session.user.email!,
-          email_confirmed_at: session.user.email_confirmed_at,
-          created_at: session.user.created_at!,
-        };
-        callback(user);
-      } else {
-        callback(null);
-      }
+    return supabase.auth.onAuthStateChange(async (_event, session) => {
+      const user = session?.user ? this.transformUser(session.user) : null;
+      callback(user);
     });
+  }
+
+  /**
+   * SupabaseユーザーをアプリのUser型に変換
+   * 型安全性を保証し、undefined→nullの変換を行う
+   */
+  private static transformUser(supabaseUser: SupabaseUser): User {
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email!,
+      email_confirmed_at: supabaseUser.email_confirmed_at || null,
+      created_at: supabaseUser.created_at!,
+    };
   }
 }
