@@ -47,17 +47,21 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 
 ### Key Architecture Components
 
-- **App.tsx**: Main application component with authentication routing and subscription state management
+- **App.tsx**: Main application component with React Router, AuthProvider, and QueryClientProvider setup
+- **pages/**: Page-level components (TopPage, LoginPage, SignupPage, DashboardPage) for routing
 - **types.ts**: Core TypeScript definitions for Subscription, SubscriptionFormData, and authentication types (User, AuthState, LoginFormData)
 - **types/exchange.ts**: Exchange rate related type definitions (Currency, ExchangeRateResponse)
 - **contexts/AuthContext.tsx**: Global authentication state management with React Context
 - **services/authService.ts**: Supabase Authentication service with email/password login and email memory
 - **services/subscriptionService.ts**: User-specific Supabase database operations (CRUD) with authentication checks
-- **lib/supabase.ts**: Supabase client configuration
+- **lib/supabase.ts**: Supabase client configuration and **lib/queryClient.ts**: TanStack Query client setup
 - **hooks/useExchangeRate.ts**: Custom hook for fetching and caching exchange rates from external API
 - **hooks/useSubscriptions.ts**: TanStack Query hooks with optimistic updates for subscription operations
+- **hooks/useToast.ts**: Toast notification management hook
 - **utils/exchangeRateCache.ts**: LocalStorage-based caching system with 24-hour expiration
-- **components/**: Modal-based UI components following BaseModal pattern, plus authentication components (LoginForm, WelcomePage)
+- **utils/dateCalculations.ts**: Date utility functions for subscription cycle calculations
+- **reducers/appReducer.ts**: useReducer pattern implementation (available but not actively used)
+- **components/**: Modal-based UI components following BaseModal pattern, plus authentication and feature components
 
 ### Directory Guidelines
 
@@ -90,6 +94,12 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 
 ## Application Architecture
 
+### Routing & Page Structure
+- **React Router DOM v7**: File-based routing with React Router configuration
+- **Page Components**: TopPage (landing), LoginPage, SignupPage, DashboardPage (main app)
+- **Protected Routes**: ProtectedRoute component ensures authentication for dashboard access
+- **Navigation**: URL-based navigation with programmatic routing via useNavigate
+
 ### Data Layer
 - **Supabase PostgreSQL**: Cloud database backend with Row Level Security (RLS) enabled
 - **Table**: `subscriptions` with columns for id, user_id, name, price, cycle, currency, category, payment fields
@@ -99,21 +109,23 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 - **LocalStorage Cache**: 24-hour caching system for exchange rates + remembered email addresses
 - **Environment Variables**: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_EXCHANGE_RATE_API_KEY` required
 
-### State Management
+### State Management Architecture
 - **Authentication State**: React Context (AuthContext) manages global user state and auth operations
 - **Server State**: TanStack Query for subscription data with optimistic updates and automatic caching
 - **UI State**: React useState for modals, forms, and component-specific state
+- **Reducer Pattern**: `appReducer.ts` available for complex state management scenarios (currently not actively used)
 - **Service Layer**: `services/subscriptionService.ts` and `services/authService.ts` abstract Supabase operations
-- **Custom Hooks**: `useAuth` for authentication, `useSubscriptions` for data operations, `useExchangeRate` for currency conversion
+- **Custom Hooks**: `useAuth` for authentication, `useSubscriptions` for data operations, `useExchangeRate` for currency conversion, `useToast` for notifications
 - **Async State**: Loading and error states managed by TanStack Query and auth context
 - **Cache Management**: Query invalidation, optimistic updates, and automatic background refetching
 
 ### Component Architecture
-- **Authentication Components**: LoginForm, WelcomePage for unauthenticated users
+- **Page Components**: TopPage, LoginPage, SignupPage, DashboardPage for main application flow
+- **Authentication Components**: LoginForm, SignupForm, WelcomePage for unauthenticated users
 - **Layout Components**: Header (with user info and logout), Main, Footer
-- **Feature Components**: SubscriptionList, SubscriptionItem, Summary (with collapsible details)
+- **Feature Components**: SubscriptionList, SubscriptionItem, Summary (with collapsible details), CategoryFilter
 - **Modal Components**: AddSubscriptionModal, EditSubscriptionModal, DeleteConfirmModal
-- **Base Components**: BaseModal, SubscriptionFormFields
+- **Base Components**: BaseModal, SubscriptionFormFields, DatePicker, Odometer, Toast
 - **Context Providers**: AuthProvider wraps entire app, QueryClientProvider for TanStack Query
 
 ### Data Flow
@@ -123,6 +135,7 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 - **Type Safety**: End-to-end TypeScript interfaces from database to UI components
 - **Multi-user Isolation**: RLS policies ensure data separation at database level
 - **Exchange Rate Flow**: API → LocalStorage Cache → UI with automatic fallback handling
+- **Navigation Flow**: React Router → Page Components → Feature Components → Modals
 
 ## Authentication System
 
@@ -192,3 +205,7 @@ Do what has been asked; nothing more, nothing less.
 NEVER create files unless they're absolutely necessary for achieving your goal.
 ALWAYS prefer editing an existing file to creating a new one.
 NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+
+## Security Reminders
+
+If there is even the slightest chance that the service's API key or special URLs may be written to a json file or env file that may contain the service's API key or special URLs, warn before committing, and suggest that they be added to the .gitignore file, and
