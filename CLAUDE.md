@@ -94,11 +94,19 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 
 ## Application Architecture
 
+### Hybrid MPA/SPA Architecture
+- **Static Landing Pages**: Public folder (`public/`) contains static HTML files (`index.html`, `about.html`, `contact.html`, etc.)
+- **React SPA**: Main application (`/app/` base path) handles authenticated user experience  
+- **Vite Configuration**: `base: '/app/'` and `outDir: 'dist/app'` separate static content from SPA routing
+- **Development vs Production**: Static files require manual editing and separate server for viewing during development
+- **Architecture Separation**: Static marketing pages (public/) + Dynamic application (src/ → /app/)
+
 ### Routing & Page Structure
-- **React Router DOM v7**: File-based routing with React Router configuration
-- **Page Components**: TopPage (landing), LoginPage, SignupPage, DashboardPage (main app)
+- **React Router DOM v7**: SPA routing configuration within `/app/` path
+- **Page Components**: TopPage (SPA landing), LoginPage, SignupPage, DashboardPage (main app)
 - **Protected Routes**: ProtectedRoute component ensures authentication for dashboard access
 - **Navigation**: URL-based navigation with programmatic routing via useNavigate
+- **Static/Dynamic Separation**: Public static pages vs dynamic React application
 
 ### Data Layer
 - **Supabase PostgreSQL**: Cloud database backend with Row Level Security (RLS) enabled

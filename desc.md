@@ -2,7 +2,14 @@
 
 ## プロジェクト概要
 React 19 + TypeScript + Tailwind CSS v4を使用したサブスクリプション管理アプリケーション。
-個人の月額・年額のサブスクリプションサービスを管理し、多通貨対応で支出を可視化するSPAです。
+個人の月額・年額のサブスクリプションサービスを管理し、多通貨対応で支出を可視化するハイブリッドMPA/SPAアプリです。
+
+### アーキテクチャ特徴
+- **ハイブリッド構成**: 静的ランディングページ（public/）+ 動的SPAアプリ（src/ → /app/）
+- **分離設計**: マーケティングページとアプリケーション機能の明確な分離
+- **Vite設定**: `base: '/app/'`により静的コンテンツとSPAルーティングを分離
+- **開発環境**: 静的ファイルは手動編集・別サーバーでの確認が必要
+
 Supabase Authenticationによるユーザー認証機能を持ち、ユーザーごとにデータが分離された安全な多用途アプリです。
 支払い日の追跡機能やカテゴリ管理、トースト通知システムを備えています。
 
@@ -23,7 +30,7 @@ Supabase Authenticationによるユーザー認証機能を持ち、ユーザー
 - **`package.json`** - プロジェクトの依存関係とスクリプト定義
 - **`pnpm-lock.yaml`** - pnpmロックファイル
 - **`pnpm-workspace.yaml`** - pnpmワークスペース設定
-- **`vite.config.ts`** - Vite設定ファイル（React + Tailwind CSS v4 plugin）
+- **`vite.config.ts`** - Vite設定ファイル（React + Tailwind CSS v4 plugin、ハイブリッド構成）
 - **`tsconfig.json`** - TypeScript設定のルートファイル
 - **`tsconfig.app.json`** - アプリケーション用TypeScript設定
 - **`tsconfig.node.json`** - Node.js環境用TypeScript設定
@@ -32,6 +39,16 @@ Supabase Authenticationによるユーザー認証機能を持ち、ユーザー
 - **`README.md`** - プロジェクト説明ファイル
 - **`desc.md`** - ファイル構成説明（本ファイル）
 - **`exchange_pt.md`** - 為替レート機能の仕様書
+
+### public/ ディレクトリ（静的ランディングページ）
+- **`index.html`** - メインランディングページ（アプリ紹介）
+- **`about.html`** - アプリ概要ページ
+- **`contact.html`** - お問い合わせページ
+- **`privacy-policy.html`** - プライバシーポリシー
+- **`404.html`** - 404エラーページ
+- **`_redirects`** - Netlifyリダイレクト設定
+- **`css/`** - 静的ページ用スタイルシート
+- **`js/`** - 静的ページ用JavaScript
 
 ### src/ ディレクトリ
 

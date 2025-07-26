@@ -3,22 +3,22 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { TopPage } from './pages/TopPage';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
 import { DashboardPage } from './pages/DashboardPage';
 
 /**
- * メインAppコンポーネント
+ * メインAppコンポーネント（SPAアプリケーション部分）
+ * /app配下でのルーティングを管理
  * React Router、AuthProvider、QueryClientProviderでラップした
- * ルーティングベースのアプリケーション
+ * 認証機能付きアプリケーション
  */
 function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClient}>
         <Routes>
-          <Route path="/" element={<TopPage />} />
+          <Route path="/" element={<LoginPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route 

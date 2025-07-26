@@ -1,0 +1,140 @@
+/* 静的ページ用CSS */
+
+/* ベーススタイル */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Hiragino Sans', 'Noto Sans CJK JP', sans-serif;
+  line-height: 1.6;
+  color: #333;
+}
+
+/* スムーススクロール */
+html {
+  scroll-behavior: smooth;
+}
+
+/* フォーカス時のアウトライン（アクセシビリティ） */
+a:focus,
+button:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* ホバーアニメーション */
+.hover-scale {
+  transition: transform 0.2s ease-in-out;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+/* フェードインアニメーション */
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.6s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* カードホバーエフェクト */
+.card-hover {
+  transition: box-shadow 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.card-hover:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+/* ローディングアニメーション */
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* メディアクエリ - タブレット */
+@media (max-width: 768px) {
+  /* モバイルメニューの調整 */
+  .mobile-menu-hidden {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+  }
+  
+  .mobile-menu-visible {
+    max-height: 300px;
+    transition: max-height 0.3s ease-in-out;
+  }
+}
+
+/* メディアクエリ - モバイル */
+@media (max-width: 480px) {
+  /* ボタンのタッチ対応 */
+  button,
+  .btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* フォントサイズの調整 */
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* プリント用スタイル */
+@media print {
+  * {
+    color: black !important;
+    background: white !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* ダークモード対応（後から追加可能） */
+@media (prefers-color-scheme: dark) {
+  /* ダークモード用スタイルを後から追加可能 */
+}
+
+/* アクセシビリティ: 動きを制限するユーザー向け */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  html {
+    scroll-behavior: auto;
+  }
+}

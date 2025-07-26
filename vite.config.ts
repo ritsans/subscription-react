@@ -9,4 +9,10 @@ export default defineConfig({
     react(),
     tailwindcss()
   ],
+  build: {
+    // SPAバンドルを dist/app 配下に出力
+    outDir: 'dist/app',
+    emptyOutDir: true,
+  },
+  base: '/app/',
 })
