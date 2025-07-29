@@ -2,7 +2,7 @@ import type { Subscription } from '../types';
 import { CATEGORY_CONFIG } from '../types';
 import { useExchangeRate } from '../hooks/useExchangeRate';
 import type { Currency } from '../types/exchange';
-import { calculateNextPaymentDate, calculateDaysUntilPayment, getDaysColor, formatDaysText } from '../utils/dateCalculations';
+import { calculateNextPaymentDate, calculateDaysUntilPayment, getDaysColor } from '../utils/dateCalculations';
 import {
   LuMusic,
   LuMonitor,
@@ -81,7 +81,8 @@ export default function SubscriptionItem({
       return {
         daysUntil,
         color: getDaysColor(daysUntil),
-        text: formatDaysText(daysUntil)
+        month: nextPaymentDate.getMonth() + 1,
+        day: nextPaymentDate.getDate()
       };
     } catch (error) {
       // 日付計算でエラーが発生した場合は表示しない
@@ -136,7 +137,7 @@ export default function SubscriptionItem({
         </div>
         
         {/* 価格 */}
-        <div className="w-48 text-right">
+        <div className="w-48 text-center">
           <div className="text-lg font-bold text-green-600">
             {formatPrice(subscription.price, subscription.cycle, subscription.currency)}
           </div>
@@ -147,11 +148,11 @@ export default function SubscriptionItem({
           )}
         </div>
         
-        {/* 次回支払い日 */}
+        {/* 支払日 */}
         <div className="w-48 text-center">
           {paymentInfo ? (
-            <span className={`text-sm font-semibold ${paymentInfo.color}`}>
-              {paymentInfo.text}
+            <span className={`font-bold ${paymentInfo.color}`}>
+              {paymentInfo.month}月{paymentInfo.day}日
             </span>
           ) : (
             <span className="text-sm text-gray-400">-</span>
