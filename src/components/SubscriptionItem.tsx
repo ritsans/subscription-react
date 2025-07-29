@@ -48,11 +48,6 @@ export default function SubscriptionItem({
     return `${symbol}${price.toLocaleString()} / ${cycle === 'monthly' ? '月' : '年'}`;
   };
 
-  // 日本円換算の価格を計算
-  const formatJPYPrice = (price: number, cycle: 'monthly' | 'yearly') => {
-    const convertedPrice = Math.floor(price * rate);
-    return `¥${convertedPrice.toLocaleString()} / ${cycle === 'monthly' ? '月' : '年'}`;
-  };
 
   // 次回支払い日と残り日数を計算
   const getPaymentInfo = () => {
@@ -122,38 +117,49 @@ export default function SubscriptionItem({
 
   return (
     <div className={`bg-white p-4 rounded-lg shadow-xs border-r border-t border-b border-gray-200 ${categoryConfig.borderColor} border-l-4 hover:shadow-md transition-shadow`}>
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-gray-800">{subscription.name}</h3>
-            {subscription.category && (
-              <span className={`px-2 py-1 text-xs rounded-full flex items-center gap-1 ${categoryConfig.badgeColor}`}>
-                {getCategoryIcon(subscription.category)}
-                {subscription.category}
-              </span>
-            )}
+      <div className="flex items-center gap-3">
+        {/* カテゴリアイコン */}
+        <div className="flex-shrink-0">
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${categoryConfig.badgeColor}`}>
+            {getCategoryIcon(subscription.category)}
           </div>
-          <div className="flex items-center gap-3 mt-1">
-            <span className="text-lg font-bold text-green-600">
-              {formatPrice(subscription.price, subscription.cycle, subscription.currency)}
+        </div>
+        
+        {/* サブスクリプション名 */}
+        <div className="w-48 min-w-0">
+          <h3 className="font-semibold text-gray-800 truncate">{subscription.name}</h3>
+          {subscription.category && (
+            <span className="text-xs text-gray-500 block mt-1">
+              {subscription.category}
             </span>
-            {paymentInfo && (
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">次回支払い:</span>
-                <span className={`text-sm font-semibold ${paymentInfo.color}`}>
-                  {paymentInfo.text}
-                </span>
-              </div>
-            )}
+          )}
+        </div>
+        
+        {/* 価格 */}
+        <div className="w-48 text-right">
+          <div className="text-lg font-bold text-green-600">
+            {formatPrice(subscription.price, subscription.cycle, subscription.currency)}
           </div>
           {shouldShowJPY && rate > 0 && (
             <div className="text-sm text-blue-500 mt-1">
-              (およそ {formatJPYPrice(subscription.price, subscription.cycle)})
+              (¥{Math.floor(subscription.price * rate).toLocaleString()})
             </div>
           )}
         </div>
         
-        <div className="flex gap-2 ml-4">
+        {/* 次回支払い日 */}
+        <div className="w-48 text-center">
+          {paymentInfo ? (
+            <span className={`text-sm font-semibold ${paymentInfo.color}`}>
+              {paymentInfo.text}
+            </span>
+          ) : (
+            <span className="text-sm text-gray-400">-</span>
+          )}
+        </div>
+        
+        {/* 編集・削除ボタン */}
+        <div className="flex gap-2 flex-shrink-0 ml-auto">
           <button
             onClick={() => onEdit(subscription)}
             className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
