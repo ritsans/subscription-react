@@ -21,7 +21,10 @@ export interface SubscriptionFormData {
   payment_day?: string; // フォーム用文字列
 }
 
+//
 // カテゴリ定義
+//
+
 export const CATEGORIES = {
   UNCATEGORIZED: 'カテゴリなし',
   MUSIC: '音楽',
@@ -32,6 +35,55 @@ export const CATEGORIES = {
   PRODUCTIVITY: '生産性',
   CLOUD: 'クラウド',
   OTHER: 'その他'
+} as const;
+
+// カテゴリごとの設定（カテゴリ・色・アイコン名はここで指定します）
+export const CATEGORY_CONFIG = {
+  [CATEGORIES.MUSIC]: {
+    borderColor: 'border-l-purple-500',
+    badgeColor: 'bg-purple-100 text-purple-700',
+    icon: 'LuMusic'
+  },
+  [CATEGORIES.SOFTWARE]: {
+    borderColor: 'border-l-blue-500',
+    badgeColor: 'bg-blue-100 text-blue-700',
+    icon: 'LuMonitor'
+  },
+  [CATEGORIES.GAMING]: {
+    borderColor: 'border-l-green-500',
+    badgeColor: 'bg-green-100 text-green-700',
+    icon: 'LuGamepad2'
+  },
+  [CATEGORIES.ENTERTAINMENT]: {
+    borderColor: 'border-l-red-500',
+    badgeColor: 'bg-red-100 text-red-700',
+    icon: 'LuPlay'
+  },
+  [CATEGORIES.NEWS]: {
+    borderColor: 'border-l-slate-500',
+    badgeColor: 'bg-slate-100 text-slate-700',
+    icon: 'LuNewspaper'
+  },
+  [CATEGORIES.PRODUCTIVITY]: {
+    borderColor: 'border-l-yellow-500',
+    badgeColor: 'bg-yellow-100 text-yellow-700',
+    icon: 'LuZap'
+  },
+  [CATEGORIES.CLOUD]: {
+    borderColor: 'border-l-cyan-500',
+    badgeColor: 'bg-cyan-100 text-cyan-700',
+    icon: 'LuCloud'
+  },
+  [CATEGORIES.OTHER]: {
+    borderColor: 'border-l-amber-500',
+    badgeColor: 'bg-amber-100 text-amber-700',
+    icon: 'LuPackage'
+  },
+  [CATEGORIES.UNCATEGORIZED]: {
+    borderColor: 'border-l-gray-400',
+    badgeColor: 'bg-gray-100 text-gray-700',
+    icon: 'LuCircle'
+  }
 } as const;
 
 // 認証関連の型定義

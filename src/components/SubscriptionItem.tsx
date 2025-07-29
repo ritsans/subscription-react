@@ -1,7 +1,19 @@
 import type { Subscription } from '../types';
+import { CATEGORY_CONFIG } from '../types';
 import { useExchangeRate } from '../hooks/useExchangeRate';
 import type { Currency } from '../types/exchange';
 import { calculateNextPaymentDate, calculateDaysUntilPayment, getDaysColor, formatDaysText } from '../utils/dateCalculations';
+import {
+  LuMusic,
+  LuMonitor,
+  LuGamepad2,
+  LuPlay,
+  LuNewspaper,
+  LuZap,
+  LuCloud,
+  LuPackage,
+  LuCircle
+} from 'react-icons/lu';
 
 interface SubscriptionItemProps {
   subscription: Subscription;
@@ -85,14 +97,38 @@ export default function SubscriptionItem({
 
   const paymentInfo = getPaymentInfo();
 
+  // カテゴリに応じたアイコンを取得
+  const getCategoryIcon = (category: string) => {
+    const config = CATEGORY_CONFIG[category as keyof typeof CATEGORY_CONFIG];
+    if (!config) return <LuCircle className="w-4 h-4" />;
+    
+    const iconName = config.icon;
+    switch (iconName) {
+      case 'LuMusic': return <LuMusic className="w-4 h-4" />;
+      case 'LuMonitor': return <LuMonitor className="w-4 h-4" />;
+      case 'LuGamepad2': return <LuGamepad2 className="w-4 h-4" />;
+      case 'LuPlay': return <LuPlay className="w-4 h-4" />;
+      case 'LuNewspaper': return <LuNewspaper className="w-4 h-4" />;
+      case 'LuZap': return <LuZap className="w-4 h-4" />;
+      case 'LuCloud': return <LuCloud className="w-4 h-4" />;
+      case 'LuPackage': return <LuPackage className="w-4 h-4" />;
+      case 'LuCircle': return <LuCircle className="w-4 h-4" />;
+      default: return <LuCircle className="w-4 h-4" />;
+    }
+  };
+
+  // カテゴリの設定を取得
+  const categoryConfig = CATEGORY_CONFIG[subscription.category as keyof typeof CATEGORY_CONFIG] || CATEGORY_CONFIG['カテゴリなし'];
+
   return (
-    <div className="bg-white p-4 rounded-lg shadow-xs border border-gray-200 hover:shadow-md transition-shadow">
+    <div className={`bg-white p-4 rounded-lg shadow-xs border-r border-t border-b border-gray-200 ${categoryConfig.borderColor} border-l-4 hover:shadow-md transition-shadow`}>
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             <h3 className="font-semibold text-gray-800">{subscription.name}</h3>
             {subscription.category && (
-              <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">
+              <span className={`px-2 py-1 text-xs rounded-full flex items-center gap-1 ${categoryConfig.badgeColor}`}>
+                {getCategoryIcon(subscription.category)}
                 {subscription.category}
               </span>
             )}
