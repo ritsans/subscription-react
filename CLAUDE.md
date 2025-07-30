@@ -27,6 +27,10 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 
 - `npx @tailwindcss/upgrade` - if the tailwindcss styling does not appear as expected, this command should be executed first.
 
+## Development Environment Notes
+
+- We do not propose to set up a development server because it does not work well in the current environment.
+
 ## Tech Stack
 
 - **Framework**: React 19 with TypeScript
@@ -216,4 +220,10 @@ NEVER proactively create documentation files (*.md) or README files. Only create
 
 ## Security Reminders
 
-If there is even the slightest chance that the service's API key or special URLs may be written to a json file or env file that may contain the service's API key or special URLs, warn before committing, and suggest that they be added to the .gitignore file, and
+If there is even the slightest chance that the service's API key or special URLs may be written to a json file or env file that may contain the service's API key or special URLs, warn before committing, and suggest that they be added to the .gitignore file.
+
+# Important Instruction Reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
