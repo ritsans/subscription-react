@@ -22,7 +22,10 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
     currency: 'JPY',
     category: CATEGORIES.UNCATEGORIZED,
     payment_start_date: '',
-    payment_pattern: 'none'
+    payment_pattern: 'none',
+    has_trial: false,
+    trial_period_days: '',
+    trial_start_date: ''
   });
 
   const [errors, setErrors] = useState<{
@@ -30,6 +33,8 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
     price?: string;
     payment_start_date?: string;
     payment_day?: string;
+    trial_period_days?: string;
+    trial_start_date?: string;
   }>({});
 
   const validateForm = (): boolean => {
@@ -57,6 +62,19 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
       newErrors.payment_day = '支払い日を選択してください';
     }
 
+    // トライアル期間のバリデーション
+    if (formData.has_trial) {
+      if (!formData.trial_period_days || !formData.trial_period_days.trim()) {
+        newErrors.trial_period_days = 'トライアル期間を入力してください';
+      } else {
+        const trialDays = parseInt(formData.trial_period_days);
+        if (isNaN(trialDays) || trialDays <= 0 || trialDays > 365) {
+          newErrors.trial_period_days = '1〜365日の範囲で入力してください';
+        }
+      }
+
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -70,7 +88,7 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
 
     const price = parseFloat(formData.price);
     
-    // 支払い情報の処理
+    // 支払い情報とトライアル情報の処理
     const subscriptionData: Omit<Subscription, 'id'> = {
       name: formData.name.trim(),
       price,
@@ -79,7 +97,10 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
       category: formData.category,
       payment_start_date: formData.payment_pattern && formData.payment_pattern !== 'none' && formData.payment_start_date ? formData.payment_start_date : '',
       payment_pattern: formData.payment_pattern && formData.payment_pattern !== 'none' ? formData.payment_pattern : 'contract_based',
-      payment_day: formData.payment_pattern === 'fixed_day' && formData.payment_day ? parseInt(formData.payment_day) : undefined
+      payment_day: formData.payment_pattern === 'fixed_day' && formData.payment_day ? parseInt(formData.payment_day) : undefined,
+      has_trial: formData.has_trial,
+      trial_period_days: formData.has_trial && formData.trial_period_days ? parseInt(formData.trial_period_days) : undefined,
+      trial_start_date: formData.has_trial ? new Date().toISOString().split('T')[0] : undefined
     };
 
     onAdd(subscriptionData);
@@ -92,7 +113,10 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
       currency: 'JPY', 
       category: CATEGORIES.UNCATEGORIZED,
       payment_start_date: '',
-      payment_pattern: 'none'
+      payment_pattern: 'none',
+      has_trial: false,
+      trial_period_days: '',
+      trial_start_date: ''
     });
     setErrors({});
     onClose();
@@ -106,7 +130,10 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
       currency: 'JPY', 
       category: CATEGORIES.UNCATEGORIZED,
       payment_start_date: '',
-      payment_pattern: 'none'
+      payment_pattern: 'none',
+      has_trial: false,
+      trial_period_days: '',
+      trial_start_date: ''
     });
     setErrors({});
     onClose();

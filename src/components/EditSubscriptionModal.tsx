@@ -24,7 +24,10 @@ export const EditSubscriptionModal: React.FC<EditSubscriptionModalProps> = ({
     currency: 'JPY',
     category: CATEGORIES.UNCATEGORIZED,
     payment_start_date: '',
-    payment_pattern: 'none'
+    payment_pattern: 'none',
+    has_trial: false,
+    trial_period_days: '',
+    trial_start_date: ''
   });
 
   const [errors, setErrors] = useState<{
@@ -32,6 +35,8 @@ export const EditSubscriptionModal: React.FC<EditSubscriptionModalProps> = ({
     price?: string;
     payment_start_date?: string;
     payment_day?: string;
+    trial_period_days?: string;
+    trial_start_date?: string;
   }>({});
 
   useEffect(() => {
@@ -44,7 +49,10 @@ export const EditSubscriptionModal: React.FC<EditSubscriptionModalProps> = ({
         category: subscription.category || CATEGORIES.UNCATEGORIZED,
         payment_start_date: subscription.payment_start_date || '',
         payment_pattern: subscription.payment_pattern || 'none',
-        payment_day: subscription.payment_day?.toString() || ''
+        payment_day: subscription.payment_day?.toString() || '',
+        has_trial: subscription.has_trial || false,
+        trial_period_days: subscription.trial_period_days?.toString() || '',
+        trial_start_date: subscription.trial_start_date || ''
       });
       setErrors({});
     }
@@ -75,6 +83,19 @@ export const EditSubscriptionModal: React.FC<EditSubscriptionModalProps> = ({
       newErrors.payment_day = '支払い日を選択してください';
     }
 
+    // トライアル期間のバリデーション
+    if (formData.has_trial) {
+      if (!formData.trial_period_days || !formData.trial_period_days.trim()) {
+        newErrors.trial_period_days = 'トライアル期間を入力してください';
+      } else {
+        const trialDays = parseInt(formData.trial_period_days);
+        if (isNaN(trialDays) || trialDays <= 0 || trialDays > 365) {
+          newErrors.trial_period_days = '1〜365日の範囲で入力してください';
+        }
+      }
+
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -88,7 +109,7 @@ export const EditSubscriptionModal: React.FC<EditSubscriptionModalProps> = ({
 
     const price = parseFloat(formData.price);
     
-    // 支払い情報の処理
+    // 支払い情報とトライアル情報の処理
     const updatedSubscription: Subscription = {
       ...subscription,
       name: formData.name.trim(),
@@ -98,7 +119,10 @@ export const EditSubscriptionModal: React.FC<EditSubscriptionModalProps> = ({
       category: formData.category,
       payment_start_date: formData.payment_pattern && formData.payment_pattern !== 'none' && formData.payment_start_date ? formData.payment_start_date : '',
       payment_pattern: formData.payment_pattern && formData.payment_pattern !== 'none' ? formData.payment_pattern : 'contract_based',
-      payment_day: formData.payment_pattern === 'fixed_day' && formData.payment_day ? parseInt(formData.payment_day) : undefined
+      payment_day: formData.payment_pattern === 'fixed_day' && formData.payment_day ? parseInt(formData.payment_day) : undefined,
+      has_trial: formData.has_trial,
+      trial_period_days: formData.has_trial && formData.trial_period_days ? parseInt(formData.trial_period_days) : undefined,
+      trial_start_date: formData.has_trial ? (subscription.trial_start_date || new Date().toISOString().split('T')[0]) : undefined
     };
 
     onUpdate(updatedSubscription);

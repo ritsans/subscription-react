@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Subscription } from '../types';
 import { useExchangeRate } from '../hooks/useExchangeRate';
+import { isInTrialPeriod } from '../utils/dateCalculations';
 import Odometer from './Odometer';
 
 interface SummaryProps {
@@ -61,17 +62,33 @@ export default function Summary({ subscriptions }: SummaryProps) {
       : 'text-xl font-bold text-blue-600';
   };
 
-  // 各通貨の合計を計算
+  // 各通貨の合計を計算（トライアル期間中のサービスは除外）
   const calculateTotals = (subscriptions: Subscription[]) => {
-    // 月額料金サマリー: 月額サブスクリプションのみを合計
+    // 月額料金サマリー: 月額サブスクリプションのみを合計（トライアル期間中は除外）
     const monthlyTotal = subscriptions.reduce((total, subscription) => {
+      // トライアル期間中の場合は合計に含めない
+      const trialStartDate = subscription.trial_start_date ? new Date(subscription.trial_start_date) : undefined;
+      if (subscription.has_trial && subscription.trial_period_days && trialStartDate) {
+        const inTrial = isInTrialPeriod(subscription.has_trial, subscription.trial_period_days, trialStartDate);
+        if (inTrial) {
+          return total;
+        }
+      }
       return subscription.cycle === 'monthly' 
         ? total + subscription.price 
         : total;
     }, 0);
     
-    // 年額合計サマリー: 年額サブスクリプションのみを合計
+    // 年額合計サマリー: 年額サブスクリプションのみを合計（トライアル期間中は除外）
     const yearlyTotal = subscriptions.reduce((total, subscription) => {
+      // トライアル期間中の場合は合計に含めない
+      const trialStartDate = subscription.trial_start_date ? new Date(subscription.trial_start_date) : undefined;
+      if (subscription.has_trial && subscription.trial_period_days && trialStartDate) {
+        const inTrial = isInTrialPeriod(subscription.has_trial, subscription.trial_period_days, trialStartDate);
+        if (inTrial) {
+          return total;
+        }
+      }
       return subscription.cycle === 'yearly' 
         ? total + subscription.price 
         : total;
@@ -128,7 +145,6 @@ export default function Summary({ subscriptions }: SummaryProps) {
   };
 
   const { monthlyTotalJPY, yearlyTotalJPY, hasConversionError } = calculateGrandTotal();
-
   // サマリーの通貨別表示の表示順序を固定する
   const currencyOrder = ['JPY', 'USD', 'EUR'] as const;
 

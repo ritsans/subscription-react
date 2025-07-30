@@ -8,6 +8,9 @@ export interface Subscription {
   payment_start_date: string; // ISO date string
   payment_pattern: 'fixed_day' | 'contract_based' | 'none';
   payment_day?: number; // 毎月固定日パターンの場合のみ
+  has_trial: boolean; // 無料トライアル期間の有無
+  trial_period_days?: number; // トライアル期間の日数
+  trial_start_date?: string; // トライアル開始日（ISO文字列）
 }
 
 export interface SubscriptionFormData {
@@ -19,6 +22,9 @@ export interface SubscriptionFormData {
   payment_start_date: string; // ISO date string
   payment_pattern: 'fixed_day' | 'contract_based' | 'none';
   payment_day?: string; // フォーム用文字列
+  has_trial: boolean; // 無料トライアル期間の有無
+  trial_period_days?: string; // トライアル期間の日数（フォーム用文字列）
+  trial_start_date?: string; // トライアル開始日（ISO文字列）
 }
 
 //

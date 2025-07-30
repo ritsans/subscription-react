@@ -8,6 +8,9 @@ export interface PaymentInfo {
   paymentPattern: PaymentPattern;
   paymentDay?: number; // 毎月固定日パターンの場合のみ
   cycle: SubscriptionCycle;
+  hasTrial?: boolean; // 無料トライアル期間の有無
+  trialPeriodDays?: number; // トライアル期間の日数
+  trialStartDate?: Date; // トライアル開始日
 }
 
 /**
@@ -15,8 +18,23 @@ export interface PaymentInfo {
  */
 export const calculateNextPaymentDate = (paymentInfo: PaymentInfo): Date => {
   const today = new Date();
-  const { paymentStartDate, paymentPattern, paymentDay, cycle } = paymentInfo;
+  const { paymentStartDate, paymentPattern, paymentDay, cycle, hasTrial, trialPeriodDays, trialStartDate } = paymentInfo;
 
+  // トライアル期間がある場合の処理
+  if (hasTrial && trialPeriodDays && trialStartDate) {
+    const trialEndDate = new Date(trialStartDate);
+    trialEndDate.setDate(trialEndDate.getDate() + trialPeriodDays);
+    
+    // トライアル期間中の場合は、トライアル終了日を返す
+    if (today < trialEndDate) {
+      return trialEndDate;
+    }
+    
+    // トライアル終了後の初回課金日を計算
+    return calculatePostTrialFirstPayment(trialEndDate, paymentStartDate, paymentPattern, paymentDay, cycle);
+  }
+
+  // 通常の支払い日計算
   if (paymentPattern === 'fixed_day' && paymentDay) {
     return calculateFixedDayNextPayment(today, paymentDay, cycle);
   } else {
@@ -143,6 +161,57 @@ export const getDaysColor = (days: number): string => {
 };
 
 /**
+ * トライアル終了後の初回課金日を計算する
+ */
+const calculatePostTrialFirstPayment = (
+  trialEndDate: Date,
+  paymentStartDate: Date,
+  paymentPattern: PaymentPattern,
+  paymentDay?: number,
+  cycle: SubscriptionCycle = 'monthly'
+): Date => {
+  if (paymentPattern === 'fixed_day' && paymentDay) {
+    // 毎月固定日パターンの場合、トライアル終了日以降の最初の固定日
+    return calculateFixedDayNextPayment(trialEndDate, paymentDay, cycle);
+  } else {
+    // 契約日ベースパターンの場合、トライアル終了日以降の最初の契約日
+    return calculateContractBasedNextPayment(trialEndDate, paymentStartDate, cycle);
+  }
+};
+
+/**
+ * トライアル期間中かどうかを判定する
+ */
+export const isInTrialPeriod = (
+  hasTrial: boolean,
+  trialPeriodDays?: number,
+  trialStartDate?: Date
+): boolean => {
+  if (!hasTrial || !trialPeriodDays || !trialStartDate) {
+    return false;
+  }
+  
+  const today = new Date();
+  const trialEndDate = new Date(trialStartDate);
+  trialEndDate.setDate(trialEndDate.getDate() + trialPeriodDays);
+  
+  return today < trialEndDate;
+};
+
+/**
+ * トライアル期間の残り日数を計算する
+ */
+export const calculateTrialDaysRemaining = (
+  trialPeriodDays: number,
+  trialStartDate: Date
+): number => {
+  const trialEndDate = new Date(trialStartDate);
+  trialEndDate.setDate(trialEndDate.getDate() + trialPeriodDays);
+  
+  return calculateDaysUntilPayment(trialEndDate);
+};
+
+/**
  * 残り日数の表示テキストを生成する
  */
 export const formatDaysText = (days: number): string => {
@@ -154,3 +223,4 @@ export const formatDaysText = (days: number): string => {
     return `${days}日後`;
   }
 };
+

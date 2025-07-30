@@ -2,7 +2,7 @@ import type { Subscription } from '../types';
 import { CATEGORY_CONFIG } from '../types';
 import { useExchangeRate } from '../hooks/useExchangeRate';
 import type { Currency } from '../types/exchange';
-import { calculateNextPaymentDate, calculateDaysUntilPayment, getDaysColor } from '../utils/dateCalculations';
+import { calculateNextPaymentDate, calculateDaysUntilPayment, getDaysColor, isInTrialPeriod, calculateTrialDaysRemaining } from '../utils/dateCalculations';
 import {
   LuMusic,
   LuMonitor,
@@ -49,8 +49,35 @@ export default function SubscriptionItem({
   };
 
 
+  // トライアル期間の状態を確認
+  const getTrialInfo = () => {
+    if (!subscription.has_trial || !subscription.trial_period_days || !subscription.trial_start_date) {
+      return null;
+    }
+
+    const trialStartDate = new Date(subscription.trial_start_date);
+    const inTrial = isInTrialPeriod(subscription.has_trial, subscription.trial_period_days, trialStartDate);
+    
+    if (inTrial) {
+      const daysRemaining = calculateTrialDaysRemaining(subscription.trial_period_days, trialStartDate);
+      return {
+        inTrial: true,
+        daysRemaining,
+        color: daysRemaining <= 3 ? 'text-orange-500' : 'text-blue-500'
+      };
+    }
+    
+    return { inTrial: false };
+  };
+
   // 次回支払い日と残り日数を計算
   const getPaymentInfo = () => {
+    // トライアル期間中の場合は支払い情報を表示しない
+    const trialInfo = getTrialInfo();
+    if (trialInfo?.inTrial) {
+      return null;
+    }
+
     // noneパターンの場合は表示しない
     if (!subscription.payment_pattern || subscription.payment_pattern === 'none') {
       return null;
@@ -72,7 +99,10 @@ export default function SubscriptionItem({
           : new Date(), // fixed_dayの場合は今日の日付を使用（実際の計算では使われない）
         paymentPattern: subscription.payment_pattern,
         paymentDay: subscription.payment_day,
-        cycle: subscription.cycle
+        cycle: subscription.cycle,
+        hasTrial: subscription.has_trial,
+        trialPeriodDays: subscription.trial_period_days,
+        trialStartDate: subscription.trial_start_date ? new Date(subscription.trial_start_date) : undefined
       };
 
       const nextPaymentDate = calculateNextPaymentDate(paymentInfo);
@@ -92,6 +122,7 @@ export default function SubscriptionItem({
   };
 
   const paymentInfo = getPaymentInfo();
+  const trialInfo = getTrialInfo();
 
   // カテゴリに応じたアイコンを取得
   const getCategoryIcon = (category: string) => {
@@ -138,19 +169,41 @@ export default function SubscriptionItem({
         
         {/* 価格 */}
         <div className="w-48 text-center">
-          <div className="text-lg font-bold text-green-600">
-            {formatPrice(subscription.price, subscription.cycle, subscription.currency)}
-          </div>
-          {shouldShowJPY && rate > 0 && (
-            <div className="text-sm text-blue-500 mt-1">
-              (¥{Math.floor(subscription.price * rate).toLocaleString()})
+          {trialInfo?.inTrial ? (
+            <div>
+              <div className="text-lg font-bold text-blue-500">
+                トライアル中
+              </div>
+              <div className="text-sm text-gray-500 line-through mt-1">
+                {formatPrice(subscription.price, subscription.cycle, subscription.currency)}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div className="text-lg font-bold text-green-600">
+                {formatPrice(subscription.price, subscription.cycle, subscription.currency)}
+              </div>
+              {shouldShowJPY && rate > 0 && (
+                <div className="text-sm text-blue-500 mt-1">
+                  (¥{Math.floor(subscription.price * rate).toLocaleString()})
+                </div>
+              )}
             </div>
           )}
         </div>
         
-        {/* 支払日 */}
+        {/* 支払日/トライアル状態 */}
         <div className="w-48 text-center">
-          {paymentInfo ? (
+          {trialInfo?.inTrial ? (
+            <div>
+              <span className={`font-bold ${trialInfo.color}`}>
+                トライアル中
+              </span>
+              <div className="text-xs text-gray-500 mt-1">
+                残り{trialInfo.daysRemaining}日
+              </div>
+            </div>
+          ) : paymentInfo ? (
             <span className={`font-bold ${paymentInfo.color}`}>
               {paymentInfo.month}月{paymentInfo.day}日
             </span>

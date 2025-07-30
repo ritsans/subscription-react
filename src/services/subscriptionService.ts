@@ -12,6 +12,9 @@ export interface DatabaseSubscription {
   payment_start_date?: string;
   payment_pattern?: 'fixed_day' | 'contract_based' | 'none';
   payment_day?: number;
+  has_trial?: boolean; // 無料トライアル期間の有無
+  trial_period_days?: number; // トライアル期間の日数
+  trial_start_date?: string; // トライアル開始日（ISO文字列）
   created_at: string;
   updated_at: string;
 }
@@ -45,6 +48,9 @@ export const fetchSubscriptions = async (): Promise<Subscription[]> => {
     payment_start_date: item.payment_start_date || '',
     payment_pattern: item.payment_pattern || 'contract_based',
     payment_day: item.payment_day,
+    has_trial: item.has_trial || false,
+    trial_period_days: item.trial_period_days,
+    trial_start_date: item.trial_start_date,
   }));
 };
 
@@ -68,6 +74,9 @@ export const createSubscription = async (subscription: Omit<Subscription, 'id'>)
     payment_start_date: subscription.payment_start_date || null,
     payment_pattern: subscription.payment_pattern || null,
     payment_day: subscription.payment_day || null,
+    has_trial: subscription.has_trial || false,
+    trial_period_days: subscription.trial_period_days || null,
+    trial_start_date: subscription.trial_start_date || null,
   };
 
   const { data, error } = await supabase
@@ -90,6 +99,9 @@ export const createSubscription = async (subscription: Omit<Subscription, 'id'>)
     payment_start_date: data.payment_start_date || '',
     payment_pattern: data.payment_pattern || 'contract_based',
     payment_day: data.payment_day,
+    has_trial: data.has_trial || false,
+    trial_period_days: data.trial_period_days,
+    trial_start_date: data.trial_start_date,
   };
 };
 
@@ -112,6 +124,9 @@ export const updateSubscription = async (subscription: Subscription): Promise<Su
     payment_start_date: subscription.payment_start_date || null,
     payment_pattern: subscription.payment_pattern || null,
     payment_day: subscription.payment_day || null,
+    has_trial: subscription.has_trial || false,
+    trial_period_days: subscription.trial_period_days || null,
+    trial_start_date: subscription.trial_start_date || null,
   };
 
   const { data, error } = await supabase
@@ -136,6 +151,9 @@ export const updateSubscription = async (subscription: Subscription): Promise<Su
     payment_start_date: data.payment_start_date || '',
     payment_pattern: data.payment_pattern || 'contract_based',
     payment_day: data.payment_day,
+    has_trial: data.has_trial || false,
+    trial_period_days: data.trial_period_days,
+    trial_start_date: data.trial_start_date,
   };
 };
 
