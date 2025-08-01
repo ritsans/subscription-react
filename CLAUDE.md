@@ -23,13 +23,13 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 - `pnpm format` - Format code using Prettier
 - `pnpm preview` - Preview production build locally
 
-## Custom Tool
-
-- `npx @tailwindcss/upgrade` - if the tailwindcss styling does not appear as expected, this command should be executed first.
-
 ## Development Environment Notes
 
 - We do not propose to set up a development server because it does not work well in the current environment.
+
+## Temporary Files Management
+
+- If you want to temporarily create sql files or other files to create SQL statements, please create them in the /temp directory. (This is not subject to git tracking, so development will not be affected.
 
 ## Tech Stack
 
@@ -74,7 +74,7 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 - Don't split components with low reusability
 - Prefer simple, flat directory structure
 
-## Coding Guidelines
+## Coding Guidelines & Principles
 
 - Use 2 spaces for indentation
 - Always use semicolons
@@ -83,9 +83,85 @@ This project uses **pnpm** (see pnpm-lock.yaml and pnpm-workspace.yaml). Always 
 - Use ES modules (import/export)
 - All functions and components should be written in Arrow functions (e.g const foo = () => {}).
 
+### 1. Code design principles (KISS, DRY, SOLID, etc.)
+
+**DRY Principle (Don't Repeat Yourself)**
+
+- Avoid duplicating the same logic; extract shared functionality into functions or components.
+- Manage configuration values and constants in a single location to enable reuse.
+- When encountering similar patterns, consider designing a generic solution.
+
+**KISS Principle (Keep It Simple, Stupid)**
+
+- Favor simple and easily understandable solutions over complex implementations.
+- Each function or component should have only one responsibility.
+- Avoid excessive abstraction and premature optimization.
+
+**YAGNI Principle (You Aren't Gonna Need It)**
+
+- Do not implement features that are not currently needed.
+- Prevent overengineering and unnecessary work by keeping the code simple and understandable.
+- Add features only when there is a confirmed need.
+
+**SOLID Principles**
+
+- **Single Responsibility Principle**: Each class or function should have only one reason to change.
+- **Open/Closed Principle**: Software should be open for extension but closed for modification.
+- **Liskov Substitution Principle**: Subtypes must be substitutable for their base types.
+- **Interface Segregation Principle**: Do not force clients to depend on methods they do not use.
+- **Dependency Inversion Principle**: Depend on abstractions, not on concrete implementations.
+
+**Other Key Principles**
+
+- **Readability First**: Code is read more often than it is written.
+- **Consistency**: Use a unified style and pattern across the entire project.
+- **Testability**: Design with test-friendly structure in mind.
+- **Error Handling**: Include proper exception handling and consider edge cases.
+- **Performance**: Use efficient algorithms and data structures when needed.
+
+### 2. Type Safety (TypeScript)
+
+- **Avoid any**: Do not use the any type unless absolutely necessary. When used, always include a comment explaining the reason.
+- **Leverage Type Inference**: Allow TypeScript to infer return types, but always explicitly annotate parameter types and props.
+- **Keep props Type Definitions Simple**: Prefer concise and clear type definitions over verbose ones.
+- **Use type or interface for Type Definitions**: Define types with type or interface, emphasizing extensibility and readability.
+
+### 3. React Coding Guidelines
+
+- **Use Function Components and Hooks**: Function components with Hooks are the standard; avoid class components.
+- **Destructure props**: Always use destructuring for props to improve readability and maintainability.
+- **Avoid Unnecessary Fragments**: Use <></> only when necessary.
+- **One Component per File**: Each component should be in its own file and typically range from 100 to 500 lines. Split large components into smaller ones.
+- **Minimize Re-renders and Side Effects**: Use useEffect, useMemo, and useCallback sparingly and only when needed.
+- **Prefer Pure Functions**: Design components and hooks as pure functions where output is determined solely by input, avoiding side effects.
+
+### 4. Naming Conventions and General Practices
+
+- Prefer const for Declarations: Avoid reassignments and never use var.
+- Clear Naming for Variables and Functions: Use descriptive names. Use plural forms for arrays and start function names with verbs.
+- No Magic Numbers or Hardcoding: Replace literals with constants where needed.
+- Avoid Type Assertions (as): Do not use type assertions unless absolutely necessary.
+
+### 5. coding convention tools / automatic formatting
+
+- **ESLint + Prettier** to ensure automatic and consistent code quality and style.
+
+### Additional Best Practices
+
+- **Directory/File Structure**: Follow best practices such as those in “bulletproof-react” to ensure a scalable and understandable project structure.
+- **Use Object Parameters When There Are Many Arguments**: Prevent issues with argument order and maintain readability by using an object for parameter grouping.
+- **Consider Accessibility and Error Handling**: Implement accessibility features and robust error handling mechanisms where appropriate.
+- **Use Typed Contexts and Custom Hooks**: Enhance extensibility and robustness by using strongly typed React Context and custom hooks.
+- **Before submitting code, verify the following against these principles**:
+1. Is there any duplicated code?
+2. Is each function and component responsible for only one concern?
+3. Is the structure easy to understand and maintain?
+4. Is the design extensible and reusable?
+5. Is it consistent with the existing patterns of the project?
+
 ### Code Comments
 
-- Short Japanese comments should be added to code that performs important processing. We will try to provide easy-to-understand explanations.
+- When providing code, include concise **comments in Japanese** explaining which principles were applied and why. If alternative solutions could improve quality, include them as well.
 
 ## Configuration Notes
 
@@ -212,18 +288,11 @@ When you are asked to "commit your changes," create the appropriate commit messa
 - Commit messages are limited to 50 characters
 - The commit message should be in English, short and concise (e.g. fix styling pc-view header)
 
-# important-instruction-reminders
-Do what has been asked; nothing more, nothing less.
-NEVER create files unless they're absolutely necessary for achieving your goal.
-ALWAYS prefer editing an existing file to creating a new one.
-NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+### Important instruction reminders
+- do only what you are instructed to do, no more, no less
+- edit existing files first, create new files only when essential
+- create documentation files (*.md, README, etc.) only if explicitly requested by user
 
-## Security Reminders
-
-If there is even the slightest chance that the service's API key or special URLs may be written to a json file or env file that may contain the service's API key or special URLs, warn before committing, and suggest that they be added to the .gitignore file.
-
-# Important Instruction Reminders
-Do what has been asked; nothing more, nothing less.
-NEVER create files unless they're absolutely necessary for achieving your goal.
-ALWAYS prefer editing an existing file to creating a new one.
-NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+### Security reminders
+- warn before committing json and env files that may contain service API keys or special URLs
+- recommend adding these files to .gitignore

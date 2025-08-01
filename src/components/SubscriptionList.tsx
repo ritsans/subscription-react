@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import type { Subscription } from '../types';
 import SubscriptionItem from './SubscriptionItem';
 import { clearAllCachedRates } from '../utils/exchangeRateCache';
@@ -21,8 +22,10 @@ export default function SubscriptionList({
   };
   
   // USD/EUR通貨のサブスクリプションがあるかチェック
-  const hasExchangeRateSubscriptions = subscriptions.some(
-    subscription => subscription.currency === 'USD' || subscription.currency === 'EUR'
+  const hasExchangeRateSubscriptions = useMemo(() => 
+    subscriptions.some(
+      subscription => subscription.currency === 'USD' || subscription.currency === 'EUR'
+    ), [subscriptions]
   );
   if (subscriptions.length === 0) {
     return (
